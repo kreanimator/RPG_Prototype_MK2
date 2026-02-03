@@ -144,7 +144,7 @@ func _handle_body_collision(_body: Node) -> void:
 
 ## Handle player collision
 func _handle_player_collision(player: Node) -> void:
-	var player_model = player.get_node("Model_new") as PlayerModel_split
+	var player_model = player.get_node("PlayerModel") as PlayerModel
 	if player_model and player_model.resources:
 		player_model.resources.take_damage(damage)
 		#print(get_script().get_global_name(), ": Hit player for ", damage, " damage!")

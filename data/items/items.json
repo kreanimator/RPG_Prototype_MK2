@@ -1,0 +1,403 @@
+{
+  "enums": {
+	"ItemType": ["WEAPON", "ARMOR", "CONSUMABLE", "MATERIAL", "QUEST"],
+
+	"WeaponClass": ["MELEE", "RANGED", "THROWABLE"],
+
+	"RangedSubtype": ["PISTOL", "REVOLVER", "SHOTGUN", "RIFLE", "AUTO_RIFLE", "SNIPER_RIFLE", "HEAVY"],
+	"MeleeHandedness": ["ONE_HANDED", "TWO_HANDED"],
+	"MeleeEdge": ["BLUNT", "SHARP"],
+	"ThrowableSubtype": ["GRENADE"],
+
+	"ArmorType": ["LIGHT", "MEDIUM", "HEAVY"],
+	"ArmorSlot": ["HEAD", "CHEST", "LEGS", "HANDS", "FEET"],
+
+	"Rarity": ["COMMON", "UNCOMMON", "RARE", "EPIC", "LEGENDARY"],
+	"DamageType": ["PHYSICAL", "ENERGY", "BLEED", "POISON", "PLASMA", "FIRE", "BIO", "RADIATION"]
+  },
+  "items": {
+	"magnum": {
+	  "id": "magnum",
+	  "name": "Magnum .357",
+	  "type": "WEAPON",
+	  "rarity": "RARE",
+	  "stack": { "max": 1 },
+	  "weight": 2.5,
+	  "value": 350,
+	  "mods": {},
+	  "icon": "res://assets/inventory_icons/Pistols/Magnum347.png",
+	  "model": "res://assets/models/weapons/revolver.glb",
+	  "weapon_scene": "res://scenes/weapons/revolver.tscn",
+	  "tags": ["starter", "handgun"],
+	  "desc": "A sturdy .357 Magnum revolver.",
+	  "requirements": { "level": 1, "stats": { "AGL": 6 } },
+	  "durability": { "max": 200 },
+	  "weapon": {
+		"class": "RANGED",
+		"subtype": "REVOLVER",
+		"damage": { "min": 15, "max": 19, "type": "PHYSICAL" },
+		"speed": 1.1,
+		"fire_rate": 0.4,
+		"fire_mode": "SINGLE",
+		"crit": { "chance": 0.05, "multiplier": 1.9 },
+		"range": 25.0,
+		"ammo_type": "357_MAGNUM",
+		"magazine_size": 6,
+		"reload_time": 2.5,
+		"recoil": 0.35,
+		"spread": {
+		  "base": 0.5,
+		  "max": 2.0,
+		  "increase_rate": 0.1
+		}
+	  }
+	},
+
+	"baseball_bat": {
+	  "id": "baseball_bat",
+	  "name": "Baseball Bat",
+	  "type": "WEAPON",
+	  "rarity": "COMMON",
+	  "stack": { "max": 1 },
+	  "weight": 1.0,
+	  "value": 20,
+	  "mods": {},
+	  "icon": "res://assets/inventory_icons/OneHandedMelee/BaseballBat.png",
+	  "model": "res://assets/models/weapons/baseball_bat.glb",
+	  "floor_item_scene":  "res://scenes/entities/floor_item.tscn",
+	  "tags": ["blunt", "civilian"],
+	  "desc": "A wooden bat. Simple, reliable, and very swingable.",
+	  "requirements": { "level": 1, "stats": { "STR": 5 } },
+	  "durability": { "max": 100 },
+	  "weapon": {
+		"class": "MELEE",
+		"melee": {
+		  "handedness": "ONE_HANDED",
+		  "edge": "BLUNT"
+		},
+		"damage": { "min": 12, "max": 20, "type": "PHYSICAL" },
+		"speed": 1.0,
+		"crit": { "chance": 0.02, "multiplier": 1.4 },
+		"reach": 1.75,
+		"stagger": 0.25
+	  }
+	},
+	
+	"machete": {
+	  "id": "machete",
+	  "name": "Machete",
+	  "type": "WEAPON",
+	  "rarity": "COMMON",
+	  "stack": { "max": 1 },
+	  "weight": 1.0,
+	  "value": 40,
+	  "mods": {},
+	  "icon": "res://assets/inventory_icons/OneHandedMelee/Machete.png",
+	  "model": "res://assets/models/weapons/machete.glb",
+	  "weapon_scene": "res://scenes/weapons/machete.tscn",
+	  "floor_item_scene":  "res://scenes/entities/floor_item.tscn",
+	  "tags": ["blunt", "civilian"],
+	  "desc": "Old sturdy machete. Simple, reliable, and very dangerous.",
+	  "requirements": { "level": 1, "stats": { "STR": 5 } },
+	  "durability": { "max": 100 },
+	  "weapon": {
+		"class": "MELEE",
+		"melee": {
+		  "handedness": "ONE_HANDED",
+		  "edge": "SHARP"
+		},
+		"damage": { "min": 18, "max": 32, "type": "PHYSICAL" },
+		"speed": 1.0,
+		"crit": { "chance": 0.02, "multiplier": 1.4 },
+		"reach": 1.75,
+		"stagger": 0.25
+	  }
+	},
+
+	"smg": {
+	  "id": "smg",
+	  "name": "SMG",
+	  "type": "WEAPON",
+	  "rarity": "UNCOMMON",
+	  "stack": { "max": 1 },
+	  "weight": 3.0,
+	  "value": 450,
+	  "mods": {},
+	  "icon": "res://assets/inventory_icons/Pistols/SMG.PNG",
+	  "model": "res://assets/models/weapons/SubmachineGun_1.fbx",
+	  "weapon_scene": "res://scenes/weapons/smg.tscn",
+	  "tags": ["automatic", "smg", "compact"],
+	  "desc": "A compact submachine gun with high rate of fire. Perfect for close to medium range combat.",
+	  "requirements": { "level": 1, "stats": { "AGL": 4 } },
+	  "durability": { "max": 250 },
+	  "weapon": {
+		"class": "RANGED",
+		"subtype": "PISTOL",
+		"damage": { "min": 3, "max": 5, "type": "PHYSICAL" },
+		"speed": 1.5,
+		"fire_rate": 0.1,
+		"fire_mode": "AUTO",
+		"crit": { "chance": 0.03, "multiplier": 1.6 },
+		"range": 20.0,
+		"ammo_type": "9MM",
+		"magazine_size": 30,
+		"reload_time": 1.6,
+		"recoil": 0.25,
+		"spread": {
+		  "base": 1.0,
+		  "max": 5.0,
+		  "increase_rate": 0.15
+		}
+	  }
+	},
+
+	"glock19": {
+	  "id": "glock19",
+	  "name": "Glock 19",
+	  "type": "WEAPON",
+	  "rarity": "UNCOMMON",
+	  "stack": { "max": 1 },
+	  "weight": 2.8,
+	  "value": 400,
+	  "mods": {},
+	  "icon": "res://assets/inventory_icons/Pistols/Glock19.png",
+	  "model": "res://assets/models/weapons/Pistol_4.fbx",
+	  "weapon_scene": "res://scenes/weapons/glock_19.tscn",
+	  "tags": ["pistol", "burst", "compact"],
+	  "desc": "A reliable semi-automatic pistol with burst fire capability. Fires 3 rounds per trigger pull.",
+	  "requirements": { "level": 1, "stats": { "AGL": 3, "STR": 3 } },
+	  "durability": { "max": 300 },
+	  "weapon": {
+		"class": "RANGED",
+		"subtype": "PISTOL",
+		"damage": { "min": 8, "max": 12, "type": "PHYSICAL" },
+		"speed": 1.2,
+		"fire_rate": 0.3,
+		"fire_mode": "BURST",
+		"burst_size": 3,
+		"burst_delay": 0.08,
+		"crit": { "chance": 0.04, "multiplier": 1.7 },
+		"range": 22.0,
+		"ammo_type": "9MM",
+		"magazine_size": 15,
+		"reload_time": 1.5,
+		"recoil": 0.3,
+		"spread": {
+		  "base": 0.8,
+		  "max": 3.5,
+		  "increase_rate": 0.12
+		}
+	  }
+	},
+
+	"frag_grenade": {
+	  "id": "frag_grenade",
+	  "name": "Frag Grenade",
+	  "type": "WEAPON",
+	  "rarity": "UNCOMMON",
+	  "stack": { "max": 5 },
+	  "weight": 0.4,
+	  "value": 120,
+	  "mods": {},
+	  "icon": "res://assets/inventory_icons/ThrowWeapons/RGD5.PNG",
+	  "model": "res://assets/models/weapons/frag_grenade.glb",
+	  "floor_item_scene":  "res://scenes/entities/floor_item.tscn",
+	  "tags": ["explosive", "throwable"],
+	  "desc": "Timed explosive that deals high shrapnel damage in a radius.",
+	  "requirements": { "level": 2 },
+	  "weapon": {
+		"class": "THROWABLE",
+		"subtype": "GRENADE",
+		"damage": { "min": 35, "max": 50, "type": "PHYSICAL" },
+		"radius": 3.5,
+		"fuse_time": 3.0,
+		"throw_range": 15.0,
+		"cooldown": 4.0
+	  }
+	},
+
+	"iron_ore": {
+	  "id": "iron_ore",
+	  "name": "Iron Ore",
+	  "type": "MATERIAL",
+	  "rarity": "COMMON",
+	  "stack": { "max": 99 },
+	  "weight": 0.5,
+	  "value": 2,
+	  "icon": "res://assets/inventory_icons/Resources/Minerals.png",
+	  "floor_item_scene":  "res://scenes/entities/floor_item.tscn",
+	  "desc": "Raw iron ore used in crafting."
+	},
+
+	"wood": {
+	  "id": "wood",
+	  "name": "Wood Chunk",
+	  "type": "MATERIAL",
+	  "rarity": "COMMON",
+	  "stack": { "max": 99 },
+	  "weight": 0.5,
+	  "value": 2,
+	  "icon": "res://assets/inventory_icons/Resources/Wood.png",
+	  "floor_item_scene":  "res://scenes/entities/floor_item.tscn",
+	  "desc": "Wood, can be used in crafting."
+	},
+
+	"combat_helmet": {
+	  "id": "combat_helmet",
+	  "name": "Combat Helmet",
+	  "type": "ARMOR",
+	  "rarity": "COMMON",
+	  "stack": { "max": 1 },
+	  "weight": 1.5,
+	  "value": 80,
+	  "icon": "res://assets/inventory_icons/Helmets/CombatHelmet.png",
+	  "floor_item_scene": "res://scenes/entities/floor_item.tscn",
+	  "tags": ["armor", "head", "protective"],
+	  "desc": "A standard combat helmet providing basic head protection.",
+	  "requirements": { "level": 1 },
+	  "durability": { "max": 150 },
+	  "armor": {
+		"slot": "HEAD",
+		"type": "LIGHT",
+		"stats": {}
+	  }
+	},
+
+	"combat_trousers": {
+	  "id": "combat_trousers",
+	  "name": "Combat Trousers",
+	  "type": "ARMOR",
+	  "rarity": "COMMON",
+	  "stack": { "max": 1 },
+	  "weight": 2.0,
+	  "value": 100,
+	  "icon": "res://assets/inventory_icons/Legs/CombatTrousers.png",
+	  "floor_item_scene": "res://scenes/entities/floor_item.tscn",
+	  "tags": ["armor", "legs", "protective"],
+	  "desc": "Durable combat trousers designed for mobility and protection.",
+	  "requirements": { "level": 1 },
+	  "durability": { "max": 200 },
+	  "armor": {
+		"slot": "LEGS",
+		"type": "LIGHT",
+		"stats": {}
+	  }
+	},
+
+	"combat_boots": {
+	  "id": "combat_boots",
+	  "name": "Combat Boots",
+	  "type": "ARMOR",
+	  "rarity": "COMMON",
+	  "stack": { "max": 1 },
+	  "weight": 1.8,
+	  "value": 90,
+	  "icon": "res://assets/inventory_icons/Boots/CombatBoots.png",
+	  "floor_item_scene": "res://scenes/entities/floor_item.tscn",
+	  "tags": ["armor", "feet", "protective"],
+	  "desc": "Sturdy combat boots with reinforced soles for rough terrain.",
+	  "requirements": { "level": 1 },
+	  "durability": { "max": 180 },
+	  "armor": {
+		"slot": "FEET",
+		"type": "LIGHT",
+		"stats": {}
+	  }
+	},
+
+	"357_MAGNUM": {
+	  "id": "357_MAGNUM",
+	  "name": ".357 Magnum Ammo",
+	  "type": "AMMO",
+	  "rarity": "COMMON",
+	  "stack": { "max": 100 },
+	  "weight": 0.01,
+	  "value": 2,
+	  "mods": {},
+	  "icon": "res://assets/inventory_icons/Ammo/357.PNG",
+	  "tags": ["ammo", "357_MAGNUM"],
+	  "desc": "Ammunition for .357 Magnum revolvers."
+	},
+
+	"9MM": {
+	  "id": "9MM",
+	  "name": "9mm Ammo",
+	  "type": "AMMO",
+	  "rarity": "COMMON",
+	  "stack": { "max": 200 },
+	  "weight": 0.008,
+	  "value": 1,
+	  "mods": {},
+	  "icon": "res://assets/inventory_icons/Ammo/9mm.png",
+	  "tags": ["ammo", "9MM"],
+	  "desc": "Ammunition for 9mm pistols and SMGs."
+	},
+
+	"dandy_hat_of_power": {
+	  "id": "dandy_hat_of_power",
+	  "name": "Dandy Hat of Ultimate Power",
+	  "type": "ARMOR",
+	  "rarity": "LEGENDARY",
+	  "stack": { "max": 1 },
+	  "weight": 0.1,
+	  "value": 9999,
+	  "mods": {},
+	  "icon": "res://assets/inventory_icons/Helmets/DandyHat.PNG",
+	  "floor_item_scene": "res://scenes/entities/floor_item.tscn",
+	  "armor_scene": "res://scenes/armor/dandy_hat.tscn",
+	  "tags": ["armor", "head", "easter_egg", "legendary", "dandy"],
+	  "desc": "A magnificent dandy hat that somehow grants incredible power to its wearer. Fashion meets function in the most unexpected way!",
+	  "requirements": { "level": 1 },
+	  "durability": { "max": 999 },
+	  "armor": {
+		"slot": "HEAD",
+		"type": "LIGHT",
+		"stats": {
+		  "strength": 5,
+		  "agility": 5,
+		  "endurance": 5,
+		  "perception": 5,
+		  "intelligence": 5,
+		  "luck": 5,
+		  "charisma": 5
+		}
+	  }
+	},
+
+	"medkit": {
+	  "id": "medkit",
+	  "name": "Medkit",
+	  "type": "CONSUMABLE",
+	  "rarity": "COMMON",
+	  "stack": { "max": 10 },
+	  "weight": 0.5,
+	  "value": 50,
+	  "icon": "res://assets/inventory_icons/Consumables/FirstAidKit.png",
+	  "floor_item_scene": "res://scenes/entities/floor_item.tscn",
+	  "tags": ["consumable", "healing", "medical"],
+	  "desc": "A basic medical kit that restores 20 health points.",
+	  "consumable": {
+		"resource_type": "health",
+		"amount": 20
+	  }
+	},
+
+	"energy_drink": {
+	  "id": "energy_drink",
+	  "name": "Energy Drink",
+	  "type": "CONSUMABLE",
+	  "rarity": "COMMON",
+	  "stack": { "max": 10 },
+	  "weight": 0.3,
+	  "value": 30,
+	  "icon": "res://assets/inventory_icons/Consumables/EnergyDrink.png",
+	  "floor_item_scene": "res://scenes/entities/floor_item.tscn",
+	  "tags": ["consumable", "stamina", "energy"],
+	  "desc": "A refreshing energy drink that restores 20 stamina points.",
+	  "consumable": {
+		"resource_type": "stamina",
+		"amount": 20
+	  }
+	}
+}
+}

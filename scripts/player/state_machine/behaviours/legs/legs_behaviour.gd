@@ -7,7 +7,7 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 var combat : HumanoidCombat
 var player : Player
-var player_aim : PlayerAimNew
+var player_aim : PlayerAim
 var skeleton : Skeleton3D
 var legs : LegsMachine
 var legs_anim_settings : AnimationPlayer
