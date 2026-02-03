@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://d2dgudxyt8cox"]
+
+[ext_resource type="Script" uid="uid://duxbw56wxsf8s" path="res://scripts/vfx/click_marker.gd" id="1_642i0"]
+[ext_resource type="Material" uid="uid://0jarvudeeoqi" path="res://resources/materials/click_marker.tres" id="2_7p3wn"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_642i0"]
+material = ExtResource("2_7p3wn")
+height = 0.01
+
+[node name="ClickMarker" type="Node3D" unique_id=1991918759]
+script = ExtResource("1_642i0")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=49817759]
+mesh = SubResource("CylinderMesh_642i0")

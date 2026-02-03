@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="Encryption" format=3 uid="uid://c38nnu8m71gae"]
+
+[ext_resource type="Script" uid="uid://c5i5v1v2jnyxd" path="res://scripts/global/encryption.gd" id="1_bpslm"]
+
+[resource]
+script = ExtResource("1_bpslm")
+key = "U6,D[@mPTlUQ1J$T"
+metadata/_custom_type_script = "uid://c5i5v1v2jnyxd"

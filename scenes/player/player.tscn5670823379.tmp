@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://cs4asu0gglcme"]
+
+[ext_resource type="Script" uid="uid://by7hpqx1vv8kc" path="res://scripts/player/player.gd" id="1_8afob"]
+[ext_resource type="PackedScene" uid="uid://b13u5je01lo47" path="res://scenes/player/player_model.tscn" id="2_gmlin"]
+[ext_resource type="Script" uid="uid://cox3oxpmn5jq1" path="res://scripts/core/mouse_controller.gd" id="2_p47bc"]
+[ext_resource type="PackedScene" uid="uid://ls2l55kjj88h" path="res://scenes/player/player_visuals.tscn" id="3_lvxji"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_p47bc"]
+radius = 0.3564453
+height = 1.8433838
+
+[node name="Player" type="CharacterBody3D" unique_id=1224365205]
+collision_layer = 2
+script = ExtResource("1_8afob")
+
+[node name="PlayerModel" parent="." unique_id=1612628095 instance=ExtResource("2_gmlin")]
+
+[node name="PlayerVisuals" parent="." unique_id=925292958 instance=ExtResource("3_lvxji")]
+
+[node name="InputController" type="Node" parent="." unique_id=1552446271]
+script = ExtResource("2_p47bc")
+
+[node name="Collider" type="CollisionShape3D" parent="." unique_id=1650569114]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.91146046, 0)
+shape = SubResource("CapsuleShape3D_p47bc")
+debug_color = Color(0.92640823, 0.2510672, 0.27369165, 0.41960785)
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=1084857451]
+path_desired_distance = 0.75
+target_desired_distance = 0.75
+avoidance_enabled = true
+debug_enabled = true
+debug_path_custom_color = Color(1, 0.07058824, 0.019607844, 1)
