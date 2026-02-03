@@ -4,6 +4,9 @@
 [ext_resource type="PackedScene" uid="uid://b13u5je01lo47" path="res://scenes/player/player_model.tscn" id="2_gmlin"]
 [ext_resource type="Script" uid="uid://cox3oxpmn5jq1" path="res://scripts/core/mouse_controller.gd" id="2_p47bc"]
 [ext_resource type="PackedScene" uid="uid://ls2l55kjj88h" path="res://scenes/player/player_visuals.tscn" id="3_lvxji"]
+[ext_resource type="Script" uid="uid://dcavmaw7nf6lk" path="res://scripts/inventory_system/inventory_manager.gd" id="5_0owmy"]
+[ext_resource type="Script" uid="uid://vvntcqc73dcj" path="res://scripts/inventory_system/stats_manager.gd" id="6_qek5x"]
+[ext_resource type="Script" uid="uid://ygi133mje6oj" path="res://scripts/inventory_system/equipment_manager.gd" id="7_5gtgg"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_p47bc"]
 radius = 0.3564453
@@ -31,3 +34,12 @@ target_desired_distance = 0.75
 avoidance_enabled = true
 debug_enabled = true
 debug_path_custom_color = Color(1, 0.07058824, 0.019607844, 1)
+
+[node name="InventoryManager" type="Node" parent="." unique_id=101755003]
+script = ExtResource("5_0owmy")
+
+[node name="StatsManager" type="Node" parent="." unique_id=1691230984]
+script = ExtResource("6_qek5x")
+
+[node name="EquipmentManager" type="Node" parent="." unique_id=206362343]
+script = ExtResource("7_5gtgg")

@@ -89,13 +89,13 @@ func level_up() -> void:
 	print("Level up! New level: ", level, " | Skill points: ", skill_points)
 
 
-#func can_be_paid_behaviour(behaviour : TorsoBehaviour) -> bool:
-	## Check if we have enough ap to pay for the behavior if in combat mode
-	#if GameManager.game_state == GameManager.GameState.INVESTIGATION:
-		#return true
-	#if action_points >= behaviour.ap_cost:
-		#return true
-	#return false
+func can_be_paid_behaviour(behaviour : TorsoBehaviour) -> bool:
+	# Check if we have enough ap to pay for the behavior if in combat mode
+	if GameManager.game_state == GameManager.GameState.INVESTIGATION:
+		return true
+	if action_points >= behaviour.ap_cost:
+		return true
+	return false
 
 func take_damage(amount : float):
 	# Check invincibility (roll, i-frames, etc.)
