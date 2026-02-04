@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="SkeletonMask" format=3 uid="uid://bya38i0asnd5f"]
+
+[ext_resource type="Script" uid="uid://he5w1l1dpbvu" path="res://scripts/player/state_machine/skeleton_mask.gd" id="1_rm2qk"]
+
+[resource]
+script = ExtResource("1_rm2qk")
+bones = Array[int]([0, 1, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64])
+metadata/_custom_type_script = "uid://he5w1l1dpbvu"

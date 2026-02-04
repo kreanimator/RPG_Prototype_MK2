@@ -10,8 +10,6 @@ func get_pos_track(bone : int) -> int:
 func get_rot_track(bone : int) -> int:
 	return map[bone][&"rot"]
 
-
-
 static func bake(skeleton : Skeleton3D, animation : Animation, exit_path : String):
 	var new_map : BoneTrackMap = BoneTrackMap.new()
 	new_map.map = {}

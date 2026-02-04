@@ -8,6 +8,7 @@ var player: Player
 
 func _ready() -> void:
 	player = get_parent()
+	Utils.print_bone_indexes_with_names(skeleton)
 
 func temp_play_idle():
 	skeleton_animator.play("Idle")

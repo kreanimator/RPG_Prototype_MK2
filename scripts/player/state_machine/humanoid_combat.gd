@@ -24,7 +24,6 @@ var is_precise_aim : bool = false
 	
 func contextualize(new_input : InputPackage) -> InputPackage:
 	translate_inputs(new_input)
-	filter_with_resources(new_input)
 	
 	# TODO wrap function maybe
 	if new_input.actions.has("holster_weapon"):
@@ -90,7 +89,3 @@ func translate_inputs(input : InputPackage):
 				# light_attack_held is only for ranged weapons, skip it for melee
 				if melee_attacks.has(action):
 					input.behaviour_names.append(melee_attacks[action])
-
-func filter_with_resources(input : InputPackage):
-	if resources.statuses.has("fatigue"):
-		input.actions.erase("sprint")

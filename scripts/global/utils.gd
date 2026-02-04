@@ -116,3 +116,16 @@ func print_node_hierarchy(node, indent="") -> void:
 	print(indent + node.name)
 	for child in node.get_children():
 		print_node_hierarchy(child, indent + "  ")
+
+func print_bones(skeleton: Skeleton3D):
+	var count := skeleton.get_bone_count()
+	print("Total bones:", count)
+
+	for i in range(count):
+		var name = skeleton.get_bone_name(i)
+		var parent = skeleton.get_bone_parent(i)
+		print("Bone", i, ":", name, " | parent index:", parent)
+		
+func print_bone_indexes_with_names(skeleton: Skeleton3D) -> void:
+	for i in range(skeleton.get_bone_count()):
+		print(i, " : ", skeleton.get_bone_name(i))
