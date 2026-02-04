@@ -1,6 +1,6 @@
 extends LegsAction
 
-@export var animation : String = "idle"
+@export var animation : String = "Idle"
 
 func setup_animator(previous_action : LegsAction, _input : InputPackage):
 	if previous_action.anim_settings == anim_settings:

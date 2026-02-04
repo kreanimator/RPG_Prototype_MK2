@@ -1,28 +1,56 @@
 extends LegsAction
 
-@export var animation : String = "run"
 
-var cycle_spectre : Dictionary = {
-	Vector2(0, 1) : "_n",
-	Vector2(-1, 0) : "_w",
-	Vector2(0, -1) : "_s", 
-	Vector2(1, 0) : "_e",
-}
+@export var animation: String = "Jog_Fwd"
 
-func _ready():
-	for key in cycle_spectre.keys():
-		cycle_spectre[key] = animation + cycle_spectre[key]
+func update(input: InputPackage, delta: float) -> void:
+	player.velocity = velocity_by_nav(delta)
 
-func update(input : InputPackage, delta : float) -> void:
-	# Point-and-click movement is handled by the main player controller
-	# We just need to update the animation direction
-	var movement_dir = Vector2(player.velocity.x, player.velocity.z).normalized()
-	if movement_dir.length() > 0.1:
-		legs_animator.set_input_vector(movement_dir)
+	# rotate to movement direction (like sprint's look_at)
+	var planar_v := player.velocity
+	planar_v.y = 0.0
+	if planar_v.length_squared() > 0.0001:
+		# face where we're moving
+		player.look_at(player.global_position - planar_v.normalized(), Vector3.UP)
 
-func setup_animator(previous_action : LegsAction, _input : InputPackage):
-	if previous_action.anim_settings == anim_settings:
-		legs_animator.transition(cycle_spectre, 0.15)
+	player.move_and_slide()
+
+	# stop -> switch to idle (input can also drive this; this is a safe fallback)
+	#if player.nav_agent.is_navigation_finished():
+		#switch_to("idle", input)
+
+func velocity_by_nav(delta: float) -> Vector3:
+	var new_velocity := player.velocity
+
+	# gravity
+	if not player.is_on_floor():
+		new_velocity.y += gravity * delta
 	else:
-		legs_animator.transition(cycle_spectre, 0)
+		new_velocity.y = 0.0
+
+	var agent: NavigationAgent3D = player.nav_agent
+	if agent == null or agent.is_navigation_finished():
+		new_velocity.x = move_toward(new_velocity.x, 0.0, player.speed)
+		new_velocity.z = move_toward(new_velocity.z, 0.0, player.speed)
+		return new_velocity
+
+	var next := agent.get_next_path_position()
+	var to_next := next - player.global_position
+	to_next.y = 0.0
+
+	if to_next.length_squared() < 0.0001:
+		new_velocity.x = 0.0
+		new_velocity.z = 0.0
+		return new_velocity
+
+	var dir := to_next.normalized()
+	new_velocity.x = dir.x * player.speed
+	new_velocity.z = dir.z * player.speed
+	return new_velocity
+
+func setup_animator(previous_action: LegsAction, _input: InputPackage) -> void:
+	if previous_action.anim_settings == anim_settings:
+		legs_animator.play(animation, 0.15)
+	else:
+		legs_animator.play(animation, 0.0)
 		legs_anim_settings.play(anim_settings, 0.15)

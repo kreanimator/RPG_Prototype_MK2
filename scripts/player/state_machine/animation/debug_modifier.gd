@@ -1,8 +1,8 @@
 extends SkeletonModifier3D
 class_name DebugModifier
 
-@onready var torso_locomotion = $"../TorsoLoco" as Locomotion
-@onready var legs_locomotion = $"../LegsLoco" as Locomotion
+#@onready var torso_locomotion = $"../TorsoLoco" as Locomotion
+#@onready var legs_locomotion = $"../LegsLoco" as Locomotion
 
 
 @onready var legs_simple = $"../LegsSimple" as AnimatorModifier

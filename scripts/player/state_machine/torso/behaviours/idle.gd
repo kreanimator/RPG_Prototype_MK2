@@ -6,7 +6,7 @@ func transition_logic(input : InputPackage) -> String:
 
 func on_enter_behaviour(_input : InputPackage):
 	if torso_anim_settings.current_animation == "simple":
-		simple_torso.play("idle", 0.15)
+		simple_torso.play("Idle", 0.15)
 	else:
-		simple_torso.play("idle", 0)
+		simple_torso.play("Idle", 0)
 		torso_anim_settings.play("simple", 0.15)
