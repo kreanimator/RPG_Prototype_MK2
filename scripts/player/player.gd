@@ -44,11 +44,9 @@ func _physics_process(delta: float) -> void:
 		# keep your logic; just avoid "if direction:" (Vector3 is always truthy)
 		velocity.x = direction.x * speed
 		velocity.z = direction.z * speed
-		player_model.temp_play_run()
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, speed)
 		velocity.z = move_toward(velocity.z, 0.0, speed)
-		player_model.temp_play_idle()
 
 	move_and_slide()
 
