@@ -9,8 +9,8 @@ class_name TorsoBehaviour
 @export var stamina_cost : float = 0.0
 @export var behaviour_map : Dictionary = {
 		"idle" : "idle",
-		"move" : "walk",
-		"move_fast" : "run",
+		"move" : "run",
+		#"move_fast" : "run",
 	}
 @export var interrupted_by_fall : bool = true
 @export var maps_with_stance : bool = false

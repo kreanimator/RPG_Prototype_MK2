@@ -48,3 +48,49 @@ func _ready():
 	current_behaviour._on_enter_behaviour(InputPackage.new())
 	$LegsAnimationSettings.play("simple")
 	legs_machine.current_behaviour.on_enter_behaviour(InputPackage.new())
+	
+	
+func update(input : InputPackage, delta : float):
+	# Update resources (stamina regeneration, etc.)
+	#resources.update(delta)
+	
+	# Ensure equipment_manager is set (in case it wasn't ready in _ready())
+	if not equipment_manager and player:
+		equipment_manager = player.equipment_manager
+	if not inventory_manager and player:
+		inventory_manager = player.inventory_manager
+	
+	## Handle weapon slot switching
+	#if input.actions.has("switch_weapon_slot_1"):
+		#if equipment_manager:
+			#print("Switching to WEAPON_1 slot")
+			#equipment_manager.switch_weapon_slot("WEAPON_1")
+		#else:
+			#print("ERROR: equipment_manager is null when trying to switch to WEAPON_1")
+	#if input.actions.has("switch_weapon_slot_2"):
+		#if equipment_manager:
+			#print("Switching to WEAPON_2 slot")
+			#equipment_manager.switch_weapon_slot("WEAPON_2")
+		#else:
+			#print("ERROR: equipment_manager is null when trying to switch to WEAPON_2")
+	#
+	#player_aim.update_twinstick(input)
+	combat.contextualize(input)
+	area_awareness.contextualize(input)
+	#interaction_manager.contextualize(input)
+	
+	## Get active weapon from equipment manager if available, otherwise from socket
+	#if equipment_manager and equipment_manager.current_weapon and is_instance_valid(equipment_manager.current_weapon):
+		#active_weapon = equipment_manager.current_weapon
+	#else:
+		#active_weapon = get_weapon_from_socket(weapon_socket_ra)
+	
+	#prints(input.actions, input.aim_actions, input.combat_actions)
+	var transition_verdict = current_behaviour.check_relevance(input)
+	if transition_verdict != "okay":
+		print(current_behaviour.behaviour_name + " -> " + transition_verdict)
+		current_behaviour._on_exit_behaviour()
+		current_behaviour = torso_machine.get_behaviour_by_name(transition_verdict)
+		torso_machine.current_behaviour = current_behaviour
+		current_behaviour._on_enter_behaviour(input)
+	current_behaviour._update(input, delta)

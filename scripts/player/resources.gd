@@ -57,6 +57,7 @@ const SPRINT_SPEED: float = 7.0
 func get_pos():
 	return global_position
 
+
 func toggle_movement_mode() -> void:
 	if movement_mode == "walk":
 		movement_mode = "run"

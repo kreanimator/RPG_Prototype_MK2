@@ -5,6 +5,7 @@ extends LegsAction
 var move_speed: float = 7.0
 
 func update(input: InputPackage, delta: float) -> void:
+	print("Entering run legs action")
 	player.velocity = velocity_by_nav(delta)
 	var planar_v := player.velocity
 	planar_v.y = 0.0
@@ -46,7 +47,8 @@ func velocity_by_nav(delta: float) -> Vector3:
 
 func setup_animator(previous_action: LegsAction, _input: InputPackage) -> void:
 	if previous_action.anim_settings == anim_settings:
-		legs_animator.play(animation, 0.15)
+		pass
+		#legs_animator.transition(animation, 0.15)
 	else:
-		legs_animator.play(animation, 0.0)
+		#legs_animator.transition(animation, 0.0)
 		legs_anim_settings.play(anim_settings, 0.15)
