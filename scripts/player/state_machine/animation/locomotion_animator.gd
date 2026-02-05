@@ -2,12 +2,12 @@ extends SkeletonModifier3D
 class_name Locomotion
 
 @onready var skeleton : Skeleton3D = get_skeleton()
-@export var animations_source : AnimationPlayer
+@export var animations_source : AnimationPlayer #AnimationSource
 
-@export var anglular_speed : float = 0.05    # radians per frame
+@export var anglular_speed : float = 0.05    # radians per frame \ 0.1 is pushing it, 0.02 is veery "chill"
 
 @export var white_list : SkeletonMask
-@export var bone_track_map : BoneTrackMap
+@export var bone_track_map : BoneTrackMap #= preload("res://Player/Model/SkeletonModifiers/kaj_skeleton_track_map.res")
 @export var provides_root_velocity : bool
 
 var input_vector : Vector2
@@ -22,13 +22,13 @@ var prev_right : Vector2
 
 var curr_progress : float
 var curr_cycle_length : float
-var curr_left_anim : Animation
-var curr_right_anim : Animation
+var curr_left_anim : Animation #SkeletalAnimation
+var curr_right_anim : Animation #SkeletalAnimation
 
 var prev_progress : float
 var prev_cycle_length : float
-var prev_left_anim : Animation
-var prev_right_anim : Animation
+var prev_left_anim : Animation #SkeletalAnimation
+var prev_right_anim : Animation #SkeletalAnimation
 
 var root_pos_track = 0
 var last_update : float
@@ -60,6 +60,7 @@ var curr_transform : Transform3D
 
 var derivative_delta : float = 0.02
 
+
 func _ready():
 	curr_directions_spectre = {
 		Vector2(0, 1) : "Idle",
@@ -78,7 +79,9 @@ func _ready():
 	curr_cycle_length = 1
 	
 	prev_directions_spectre = curr_directions_spectre
+	Utils.print_animation_info("Idle", animations_source)
 
+# too much func arguments, TODO think up a DTO or smth, this is cringe
 func transition(to_spectre : Dictionary, over_time = 0, first_direction : Vector2 = Vector2.ZERO, static_dir : bool = false):
 	if over_time < 0:
 		push_error("negative transition time in locomotion modifier")
@@ -118,10 +121,13 @@ func transition(to_spectre : Dictionary, over_time = 0, first_direction : Vector
 	if has_follower:
 		follower.transition(to_spectre, over_time, first_direction, static_dir)
 
+
 func _process_modification():
 	update_time()
 	update_direction()
+	#DEV_debug_draw($"prev dir debug/Node2D", $"curr dir debug/Node2D")
 	update_skeleton()
+
 
 func update_time():
 	now = Time.get_unix_time_from_system()
@@ -131,12 +137,14 @@ func update_time():
 	last_update = now
 	
 	if curr_progress > curr_cycle_length:
+		#if curr_right_anim.looped:
 		if curr_right_anim.loop_mode == Animation.LoopMode.LOOP_LINEAR:
 			curr_progress = fmod(curr_progress, curr_cycle_length)
 		else:
 			curr_progress = curr_cycle_length
 	
 	if prev_progress > prev_cycle_length:
+		#if prev_right_anim.looped:
 		if prev_right_anim.loop_mode == Animation.LoopMode.LOOP_LINEAR:
 			prev_progress = fmod(prev_progress, prev_cycle_length)
 		else:
@@ -150,19 +158,23 @@ func update_time():
 			specters_blending_percentage = 0
 			is_blending_spectres = false
 
+
 func set_input_vector(new_direction : Vector2):
 	input_vector = new_direction
 	if has_follower:
 		follower.input_vector = new_direction
 
+
 func update_direction():
+	# current spectre (blend from this dictionary)
 	var angle = curr_direction.angle_to(input_vector)
 	if not curr_dir_static:
 		curr_direction = curr_direction.rotated(clamp(angle, -anglular_speed, anglular_speed))
-	
+	# +2 PI % 2PI because godot returs [-PI ; +PI] for angles
 	var absolute_angle = fmod(Vector2(0,1).angle_to(curr_direction) + 2 * PI, 2 * PI)
 	
 	var section = (int)( absolute_angle / curr_section_angle )
+	# section is basically the number of index of "righter" vector to the current
 	curr_right = curr_directions_spectre.keys()[section]
 	curr_left = curr_directions_spectre.keys()[(section + 1) % curr_sections_number]
 	curr_right_anim = animations_source.get_animation(curr_directions_spectre[curr_right])
@@ -181,8 +193,9 @@ func update_direction():
 		prev_left_anim = animations_source.get_animation(prev_directions_spectre[prev_left])
 		prev_direction_blending_percentage = prev_right.angle_to(prev_direction) / prev_section_angle
 
+
 func update_skeleton():
-	if white_list:
+	if white_list: #this actually is an awful untyped variable abuse, dirty af TODO kys
 		bone_list = white_list.bones
 	else:
 		bone_list = skeleton.get_bone_count()
@@ -190,14 +203,14 @@ func update_skeleton():
 	for bone in bone_list:
 		skeleton.set_bone_pose(bone, suggest_bone_pose(bone))
 
+
 func suggest_bone_pose(bone : int) -> Transform3D:
 	var track = bone_track_map.get_rot_track(bone)
 	var resulting_rotation : Quaternion
-	
+	#if track != -1:
 	var curr_right_rot : Quaternion = curr_right_anim.rotation_track_interpolate(track, curr_progress)
 	var curr_left_rot : Quaternion = curr_left_anim.rotation_track_interpolate(track, curr_progress)
 	var curr_res_rot : Quaternion = lerp(curr_right_rot, curr_left_rot, curr_direction_blending_percentage)
-	
 	if is_blending_spectres:
 		var prev_right_rot : Quaternion = prev_right_anim.rotation_track_interpolate(track, prev_progress)
 		var prev_left_rot : Quaternion = prev_left_anim.rotation_track_interpolate(track, prev_progress)
@@ -206,9 +219,13 @@ func suggest_bone_pose(bone : int) -> Transform3D:
 	else:
 		resulting_rotation = curr_res_rot
 	
+	# calculate current spectre rotation
+	# if blending spectres, caclulate next spectre rotation and lerp
 	track = bone_track_map.get_pos_track(bone)
 	var resulting_position : Vector3
 	
+	# our bone doesn't have position keys and we just don't touch it
+	# skippable if animations are imported with all tracks
 	if track == -1: 
 		resulting_position = skeleton.get_bone_pose_position(bone)
 	
@@ -225,6 +242,22 @@ func suggest_bone_pose(bone : int) -> Transform3D:
 			resulting_position = curr_res_pos
 	
 	return Transform3D(Basis(resulting_rotation), resulting_position)
+	
+	 #full-send skeletal animation way
+	#var curr_right : Transform3D = curr_right_anim.interpolate_local_transform(bone, curr_progress)
+	#var curr_left : Transform3D = curr_left_anim.interpolate_local_transform(bone, curr_progress)
+	#var curr_transform : Transform3D = curr_right.interpolate_with(curr_left, curr_direction_blending_percentage)
+#
+	#if is_blending_spectres:
+		#var prev_right : Transform3D = prev_right_anim.interpolate_local_transform(bone, prev_progress)
+		#var prev_left : Transform3D = prev_left_anim.interpolate_local_transform(bone, prev_progress)
+		#var prev_transform : Transform3D = prev_right.interpolate_with(prev_left, prev_direction_blending_percentage)
+		#curr_transform = prev_transform.interpolate_with(curr_transform, specters_blending_percentage)
+	#
+	#if bone == curr_right_anim.root_bone:
+		#curr_transform.origin = skeleton.get_bone_pose(bone).origin
+	#return curr_transform
+
 
 func accept_follower(new_follower : Locomotion):
 	has_follower = true
@@ -262,6 +295,7 @@ func sync_and_follow(another_locomotion : Locomotion, over_time : float = 0):
 		spectre_blending_duration = over_time
 	
 	another_locomotion.accept_follower(self)
+
 
 func calculate_root_velocity() -> Vector3:
 	var resulting_velocity : Vector3

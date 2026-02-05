@@ -129,3 +129,39 @@ func print_bones(skeleton: Skeleton3D):
 func print_bone_indexes_with_names(skeleton: Skeleton3D) -> void:
 	for i in range(skeleton.get_bone_count()):
 		print(i, " : ", skeleton.get_bone_name(i))
+
+func print_animation_info(anim_name: String, animations_source) -> void:
+	if animations_source == null:
+		push_error("animations_source is null")
+		return
+
+	if not animations_source.has_animation(anim_name):
+		push_error("AnimationPlayer has no animation named: " + anim_name)
+		print("Available animations: ", animations_source.get_animation_list())
+		return
+
+	var anim: Animation = animations_source.get_animation(anim_name)
+	if anim == null:
+		push_error("get_animation returned null for: " + anim_name)
+		return
+
+	print("\n=== Animation Info:", anim_name, "===")
+	print("length:", anim.length)
+	print("loop_mode:", anim.loop_mode) # 0/1/2 enum
+	print("step:", anim.step)
+	print("tracks:", anim.get_track_count())
+
+	for ti in range(anim.get_track_count()):
+		var ttype := anim.track_get_type(ti)
+		var path := anim.track_get_path(ti)
+
+		# Not all track types expose key count the same way, but for most this works:
+		var keys := anim.track_get_key_count(ti)
+
+		print("- track#", ti,
+			" type:", ttype,
+			" path:", path,
+			" keys:", keys
+		)
+
+	print("=== end ===\n")
