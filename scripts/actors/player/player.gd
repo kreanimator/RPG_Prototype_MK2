@@ -6,8 +6,7 @@ class_name Player
 @onready var player_input: InputCollector = $InputController
 @onready var player_model: PlayerModel = $PlayerModel
 @onready var player_visuals: PlayerVisuals = $PlayerVisuals
-#@onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
-
+@onready var mouse_interactor: MouseInteractor = $MouseInteractor
 @onready var inventory_manager: InventoryManager = $InventoryManager
 @onready var stats_manager: StatsManager = $StatsManager
 @onready var equipment_manager: EquipmentManager = $EquipmentManager
@@ -16,6 +15,8 @@ class_name Player
 func _ready() -> void:
 	setup_visuals()
 	set_nav_agent()
+	faction_component.faction = faction_component.Faction.PLAYER
+	
 #### FIXME: Need to move movement logic to states, example:
 #### pass nav agent and target position to state so state machine can use it
 
@@ -26,3 +27,4 @@ func _physics_process(delta: float) -> void:
 
 func setup_visuals() -> void:
 	player_visuals.accept_model(player_model)
+	player_visuals.bind_mouse_interactor(mouse_interactor)

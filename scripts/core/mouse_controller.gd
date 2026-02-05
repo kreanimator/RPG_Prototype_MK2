@@ -42,7 +42,7 @@ func collect_input() -> InputPackage:
 
 					# FIXME later move out of here (fine for now)
 					player.set_target_position(_move_target)
-					player.player_visuals.cursor_manager.set_target_point(_move_target, _move_normal)
+					player.player_visuals.cursor_manager.show_target_point(_move_target, _move_normal)
 
 				MouseMode.ATTACK:
 					new_input.actions.append("attack")

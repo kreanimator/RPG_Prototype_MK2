@@ -7,19 +7,23 @@
 [ext_resource type="Script" uid="uid://dcavmaw7nf6lk" path="res://scripts/inventory_system/inventory_manager.gd" id="5_0owmy"]
 [ext_resource type="Script" uid="uid://vvntcqc73dcj" path="res://scripts/inventory_system/stats_manager.gd" id="6_qek5x"]
 [ext_resource type="Script" uid="uid://ygi133mje6oj" path="res://scripts/inventory_system/equipment_manager.gd" id="7_5gtgg"]
-[ext_resource type="Script" uid="uid://d20fq3yfxij07" path="res://scripts/core/faction_component.gd" id="8_qek5x"]
+[ext_resource type="PackedScene" uid="uid://bukpe1wm5nsne" path="res://scenes/faction_component.tscn" id="8_qek5x"]
+[ext_resource type="Script" uid="uid://dsita382gglbe" path="res://scripts/core/mouse_interactor.gd" id="9_5gtgg"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_p47bc"]
 radius = 0.3564453
 height = 1.8111362
 
-[node name="Player" type="CharacterBody3D" unique_id=1224365205]
+[node name="Player" type="CharacterBody3D" unique_id=1224365205 groups=["player"]]
 collision_layer = 2
 script = ExtResource("1_8afob")
 
 [node name="PlayerModel" parent="." unique_id=1612628095 instance=ExtResource("2_gmlin")]
 
 [node name="PlayerVisuals" parent="." unique_id=925292958 instance=ExtResource("3_lvxji")]
+
+[node name="MouseInteractor" type="Node3D" parent="." unique_id=932931299]
+script = ExtResource("9_5gtgg")
 
 [node name="InputController" type="Node" parent="." unique_id=1552446271]
 script = ExtResource("2_p47bc")
@@ -45,6 +49,4 @@ script = ExtResource("6_qek5x")
 [node name="EquipmentManager" type="Node" parent="." unique_id=206362343]
 script = ExtResource("7_5gtgg")
 
-[node name="FactionComponent" type="Node" parent="." unique_id=1476750025]
-script = ExtResource("8_qek5x")
-faction = 0
+[node name="FactionComponent" parent="." unique_id=1729141699 instance=ExtResource("8_qek5x")]

@@ -3,6 +3,8 @@
 [ext_resource type="Material" uid="uid://hw63bpm4mqrc" path="res://resources/materials/test_floor.tres" id="1_yautc"]
 [ext_resource type="Material" uid="uid://bpbvno1o85jod" path="res://resources/materials/test_wall.tres" id="2_fr1um"]
 [ext_resource type="Material" uid="uid://byyqusw3pol8q" path="res://resources/materials/test_obstacle.tres" id="3_fr1um"]
+[ext_resource type="Script" uid="uid://ns3w76hx155w" path="res://scripts/actors/enemy.gd" id="4_48ne7"]
+[ext_resource type="PackedScene" uid="uid://bukpe1wm5nsne" path="res://scenes/faction_component.tscn" id="5_6xh4u"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_v45ci"]
 
@@ -20,6 +22,10 @@ cell_size = 0.1
 cell_height = 0.15
 agent_radius = 0.75
 agent_max_climb = 0.15
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_48ne7"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_6xh4u"]
 
 [node name="TestLevel" type="Node3D" unique_id=1311812362]
 
@@ -159,3 +165,19 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.871637, 0.76892614, 11.08
 use_collision = true
 collision_mask = 3
 material = ExtResource("3_fr1um")
+
+[node name="DummyEnemy" type="CharacterBody3D" parent="." unique_id=1654119973]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.396622, 1.2374926, 14.145405)
+script = ExtResource("4_48ne7")
+actor_name = "Fucking Mutant"
+
+[node name="FactionComponent" parent="DummyEnemy" unique_id=1729141699 instance=ExtResource("5_6xh4u")]
+faction = 3
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="DummyEnemy" unique_id=169079289]
+mesh = SubResource("CapsuleMesh_48ne7")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DummyEnemy" unique_id=1721867499]
+shape = SubResource("CapsuleShape3D_6xh4u")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="DummyEnemy" unique_id=1420669264]

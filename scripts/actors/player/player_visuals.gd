@@ -3,12 +3,15 @@ class_name PlayerVisuals
 
 @onready var model : PlayerModel
 @onready var cursor_manager: CursorManager = $CursorManager
+@onready var mouse_debug_overlay: MouseDebugOverlay = $UI/MouseDebugOverlay
 
 #@onready var hp_bar: ProgressBar = $UI/HP_BAR
 #@onready var stamina_bar: ProgressBar = $UI/STAMINA_BAR
 #@onready var ammo_debug_label: Label = $UI/AmmoDebug/Panel/AmmoDebugLabel
 #@onready var inventory: InventoryUI = $UI/Inventory
-
+func bind_mouse_interactor(interactor: MouseInteractor) -> void:
+	cursor_manager.bind(interactor)
+	mouse_debug_overlay.set_mousw_interactor(interactor)
 
 func accept_model(_model : PlayerModel) -> void:
 	model = _model

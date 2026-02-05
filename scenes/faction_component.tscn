@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://bukpe1wm5nsne"]
+
+[ext_resource type="Script" uid="uid://d20fq3yfxij07" path="res://scripts/core/faction_component.gd" id="1_nwkkq"]
+
+[node name="FactionComponent" type="Node" unique_id=1729141699]
+script = ExtResource("1_nwkkq")
+faction = 0

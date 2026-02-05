@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://e75wwefx1s2r" path="res://scripts/actors/player/player_visuals.gd" id="1_qy2ae"]
 [ext_resource type="Script" uid="uid://bubleymp172b7" path="res://scripts/actors/player/cursor_manager.gd" id="2_0g03g"]
 [ext_resource type="Script" uid="uid://b3xnh3f6dx8p8" path="res://scripts/core/ui_controller.gd" id="3_dmroa"]
+[ext_resource type="Script" uid="uid://bb7j8r136wjbo" path="res://scripts/mouse_debug_overlay.gd" id="4_wtkge"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_or7gh"]
 resource_name = "M_Main"
@@ -301,3 +302,10 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Crouch
 "
+
+[node name="MouseDebugOverlay" type="Control" parent="UI" unique_id=1831090648]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("4_wtkge")

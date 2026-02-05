@@ -1,6 +1,7 @@
 extends CharacterBody3D
 class_name Actor
 
+@export var actor_name: String = "Undefined"
 @onready var nav_agent: NavigationAgent3D = get_node_or_null("NavigationAgent3D")
 @onready var faction_component: FactionComponent = get_node_or_null("FactionComponent")
 
@@ -16,10 +17,12 @@ func set_target_position(pos: Vector3) -> void:
 
 func set_nav_agent(radius: float = 0.75,
  path_des_distance: float = 0.75,
-target_des_distance: float = 0.4 ) -> void:
+ target_des_distance: float = 0.4 ) -> void:
 	nav_agent.radius = radius
 	nav_agent.path_desired_distance = path_des_distance
 	nav_agent.target_desired_distance = target_des_distance
+	nav_agent.avoidance_enabled = true
+	nav_agent.avoidance_priority = 1.0
 
 func is_hostile_to(other: Actor) -> bool:
 	if other == null:
@@ -28,4 +31,23 @@ func is_hostile_to(other: Actor) -> bool:
 		return false
 
 	return faction_component.get_disposition_to(other.faction_component) == FactionComponent.Disposition.HOSTILE
-	
+
+
+func get_interaction_info(requester: Actor = null) -> Dictionary:
+	var info := {
+		"name": actor_name,
+		"type": "actor",
+		"faction": null,
+		"disposition": "neutral",
+	}
+
+	# Faction
+	if faction_component:
+		info["faction"] = faction_component.faction
+
+	# Disposition relative to requester
+	if requester != null and requester.faction_component and faction_component:
+		var disp = requester.faction_component.get_disposition_to(faction_component)
+		info["disposition"] = FactionComponent.Disposition.keys()[disp].to_lower()
+
+	return info
