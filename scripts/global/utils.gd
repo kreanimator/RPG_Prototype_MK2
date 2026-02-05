@@ -24,10 +24,6 @@ func is_mouse_over_gui() -> bool:
 	if not tree or not tree.root:
 		return false
 	
-	# Check keyboard focus
-	if tree.root.gui_get_focus_owner() != null:
-		return true
-	
 	# Check mouse position
 	var viewport = tree.root.get_viewport()
 	if not viewport:
@@ -122,9 +118,9 @@ func print_bones(skeleton: Skeleton3D):
 	print("Total bones:", count)
 
 	for i in range(count):
-		var name = skeleton.get_bone_name(i)
+		var bone_name = skeleton.get_bone_name(i)
 		var parent = skeleton.get_bone_parent(i)
-		print("Bone", i, ":", name, " | parent index:", parent)
+		print("Bone", i, ":", bone_name, " | parent index:", parent)
 		
 func print_bone_indexes_with_names(skeleton: Skeleton3D) -> void:
 	for i in range(skeleton.get_bone_count()):

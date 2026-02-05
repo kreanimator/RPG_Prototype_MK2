@@ -56,7 +56,8 @@ func collect_input() -> InputPackage:
 		if player.nav_agent.is_navigation_finished():
 			_move_active = false
 		else:
-			new_input.actions.append("move")
+			var mode_name = GameManager.MoveMode.keys()[GameManager.move_mode].to_lower()
+			new_input.actions.append(mode_name)
 
 	# Default
 	if new_input.actions.is_empty():

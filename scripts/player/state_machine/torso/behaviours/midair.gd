@@ -1,5 +1,7 @@
 extends TorsoBehaviour
 
+@export var animation: String = "Midair"
+
 @export_range(0.1, 2.0, 0.1) var gravity_multiplier: float = 1.2
 const MOMENTUM_DECAY: float = 0.9  # Horizontal momentum decay when input is released
 
@@ -45,17 +47,17 @@ func on_enter_behaviour(_input : InputPackage):
 	
 	# Play midair animation
 	if torso_anim_settings.current_animation == "simple":
-		simple_torso.play("Jump", 0.15)
+		simple_torso.play(animation, 0.15)
 	else:
-		simple_torso.play("Jump", 0)
+		simple_torso.play(animation, 0)
 		torso_anim_settings.play("simple", 0.15)
 
 func setup_legs_animator(previous_action : LegsAction, _input : InputPackage):
 	if previous_action.anim_settings == "simple":
-		legs.simple_animator.play("Jump", 0.15)
+		legs.simple_animator.play(animation, 0.15)
 	else:
-		legs.simple_animator.play("Jump", 0)
-		legs.legs_anim_settings.play("Jump", 0.15)
+		legs.simple_animator.play(animation, 0)
+		legs.legs_anim_settings.play(animation, 0.15)
 
 func on_exit_behaviour():
 	initial_horizontal_speed = 0.0

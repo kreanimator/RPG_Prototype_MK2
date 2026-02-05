@@ -1,5 +1,8 @@
 extends TorsoBehaviour
 
+@export var animation: String = "Jog_Fwd"
+
+
 func transition_logic(input : InputPackage) -> String:
 	map_with_dictionary(input)
 		# stop -> switch to idle (input can also drive this; this is a safe fallback)
@@ -9,7 +12,7 @@ func transition_logic(input : InputPackage) -> String:
 
 func on_enter_behaviour(_input : InputPackage):
 	if torso_anim_settings.current_animation == "simple":
-		simple_torso.play("Jog_Fwd", 0.15)
+		simple_torso.play(animation, 0.15)
 	else:
-		simple_torso.play("Jog_Fwd", 0)
+		simple_torso.play(animation, 0)
 		torso_anim_settings.play("simple", 0.15)

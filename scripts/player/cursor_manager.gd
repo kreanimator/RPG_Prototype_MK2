@@ -42,4 +42,4 @@ func set_target_point(pos: Vector3, normal: Vector3 = Vector3.UP) -> void:
 	if abs(up.dot(forward)) > 0.95:
 		forward = Vector3.RIGHT
 
-	target_point.global_basis = Basis().looking_at(forward, up)
+	target_point.global_basis = Basis.looking_at(forward, up)

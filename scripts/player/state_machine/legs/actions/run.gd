@@ -4,7 +4,7 @@ extends LegsAction
 @export var animation: String = "Jog_Fwd"
 var move_speed: float = 7.0
 
-func update(input: InputPackage, delta: float) -> void:
+func update(_input: InputPackage, delta: float) -> void:
 	player.velocity = velocity_by_nav(delta)
 	player.move_and_slide()
 
