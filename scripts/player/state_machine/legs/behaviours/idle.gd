@@ -7,5 +7,6 @@ func update(input : InputPackage, _delta : float):
 		switch_to("idle", input)
 
 func on_enter_behaviour(input : InputPackage):
+	print("Entering Idle!")
 	if legs.current_action.action_name != "idle":
 		switch_to("idle", input)

@@ -36,8 +36,8 @@ func collect_input() -> InputPackage:
 
 			match mouse_mode:
 				MouseMode.MOVE:
-					new_input.actions.append("move")
-
+					new_input.actions.append("run")
+					print("Appended run action")
 					#### FIXME Should be moved out of here
 					player.set_target_position(new_input.click_world_pos)
 					player.player_visuals.cursor_manager.set_target_point(new_input.click_world_pos, new_input.click_surface_rotation)

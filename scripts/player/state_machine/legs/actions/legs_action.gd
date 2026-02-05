@@ -2,7 +2,9 @@ extends Node
 class_name LegsAction
 
 var player : Player
+var player_aim : PlayerAim
 var skeleton : Skeleton3D
+var combat : HumanoidCombat
 var legs : LegsMachine
 var legs_anim_settings : AnimationPlayer
 var torso_anim_settings : AnimationPlayer
@@ -27,18 +29,31 @@ func seek_land(delta : float):
 	if not player.is_on_floor():
 		player.velocity.y = legs.last_y_speed - gravity * delta
 
+# heirs use different animation modifiers, so we need per child definitions
 func setup_animator(_previous_action : LegsAction, _input : InputPackage):
 	pass
+
 
 func _on_enter_action(input : InputPackage):
 	mark_enter_action()
 	on_enter_action(input)
 
+
 func on_enter_action(_input : InputPackage):
 	pass
 
+
 func on_exit_action():
 	pass
+
+
+#func get_loco_vector(input : InputPackage) -> Vector2:
+	#var vector : Vector2
+	#if combat.current_camera_mode == combat.CameraMode.FREE:
+		#vector = input.get_vector2()
+	#else:
+		#vector = input.get_vector2().rotated(player.basis.z.signed_angle_to(camera.basis.z, Vector3.UP))
+	#return vector
 
 func animation_ended() -> bool:
 	return false
