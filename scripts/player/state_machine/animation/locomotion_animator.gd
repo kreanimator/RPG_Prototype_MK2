@@ -79,7 +79,8 @@ func _ready():
 	curr_cycle_length = 1
 	
 	prev_directions_spectre = curr_directions_spectre
-	Utils.print_animation_info("Idle", animations_source)
+	#Utils.print_animation_info("Idle", animations_source)
+	Utils.print_all_animations_tracks(animations_source)
 
 # too much func arguments, TODO think up a DTO or smth, this is cringe
 func transition(to_spectre : Dictionary, over_time = 0, first_direction : Vector2 = Vector2.ZERO, static_dir : bool = false):
@@ -207,17 +208,17 @@ func update_skeleton():
 func suggest_bone_pose(bone : int) -> Transform3D:
 	var track = bone_track_map.get_rot_track(bone)
 	var resulting_rotation : Quaternion
-	if track != -1:
-		var curr_right_rot : Quaternion = curr_right_anim.rotation_track_interpolate(track, curr_progress)
-		var curr_left_rot : Quaternion = curr_left_anim.rotation_track_interpolate(track, curr_progress)
-		var curr_res_rot : Quaternion = lerp(curr_right_rot, curr_left_rot, curr_direction_blending_percentage)
-		if is_blending_spectres:
-			var prev_right_rot : Quaternion = prev_right_anim.rotation_track_interpolate(track, prev_progress)
-			var prev_left_rot : Quaternion = prev_left_anim.rotation_track_interpolate(track, prev_progress)
-			var prev_res_rot : Quaternion = lerp(prev_right_rot, prev_left_rot, prev_direction_blending_percentage)
-			resulting_rotation = lerp(prev_res_rot, curr_res_rot, specters_blending_percentage)
-		else:
-			resulting_rotation = curr_res_rot
+	#if track != -1:
+	var curr_right_rot : Quaternion = curr_right_anim.rotation_track_interpolate(track, curr_progress)
+	var curr_left_rot : Quaternion = curr_left_anim.rotation_track_interpolate(track, curr_progress)
+	var curr_res_rot : Quaternion = lerp(curr_right_rot, curr_left_rot, curr_direction_blending_percentage)
+	if is_blending_spectres:
+		var prev_right_rot : Quaternion = prev_right_anim.rotation_track_interpolate(track, prev_progress)
+		var prev_left_rot : Quaternion = prev_left_anim.rotation_track_interpolate(track, prev_progress)
+		var prev_res_rot : Quaternion = lerp(prev_right_rot, prev_left_rot, prev_direction_blending_percentage)
+		resulting_rotation = lerp(prev_res_rot, curr_res_rot, specters_blending_percentage)
+	else:
+		resulting_rotation = curr_res_rot
 	
 	# calculate current spectre rotation
 	# if blending spectres, caclulate next spectre rotation and lerp

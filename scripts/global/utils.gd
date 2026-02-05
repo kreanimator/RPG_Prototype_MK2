@@ -165,3 +165,20 @@ func print_animation_info(anim_name: String, animations_source) -> void:
 		)
 
 	print("=== end ===\n")
+
+func print_all_animations_tracks(animations_source) -> void:
+	if animations_source == null:
+		push_error("animations_source is null")
+		return
+	
+	var list: PackedStringArray = animations_source.get_animation_list()
+	print("\n=== Animations track counts (", list.size(), ") ===")
+	
+	for anim_name in list:
+		var anim: Animation = animations_source.get_animation(anim_name)
+		if anim == null:
+			print(anim_name, " -> NULL")
+			continue
+		print(anim_name, " -> tracks:", anim.get_track_count(), " length:", anim.length, " loop_mode:", anim.loop_mode)
+	
+	print("=== end ===\n")

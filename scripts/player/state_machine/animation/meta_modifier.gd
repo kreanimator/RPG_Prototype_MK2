@@ -9,9 +9,9 @@ class_name SkeletonModifierMeta
 @export var provides_root_velocity : bool
 
  # one-time pass to create a BoneTrackMap, TODO demonstrate and delete
-#func _ready():
-	#BoneTrackMap.bake(get_skeleton(), animation_player.get_animation("Idle"), "res://scripts/player/state_machine/resources/RPG_prototype_bone_track_map.res")
-
+func _ready():
+	BoneTrackMap.bake(get_skeleton(), animation_player.get_animation("Idle"), "res://scripts/player/state_machine/resources/RPG_prototype_bone_track_map.res")
+#
 func _process_modification():
 	restore_pose()
 	for child in get_skeleton().get_children():
