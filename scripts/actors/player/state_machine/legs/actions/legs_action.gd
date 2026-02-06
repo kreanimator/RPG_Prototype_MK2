@@ -76,3 +76,6 @@ func acts_between(start : float, finish : float) -> bool:
 	var progress = get_progress()
 	return progress >= start and progress <= finish
 #endregion
+
+func _is_out_of_ap() -> bool:
+	return player.player_model.resources.action_points <= 0

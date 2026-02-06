@@ -6,7 +6,7 @@ class_name TorsoBehaviour
 
 @export_group("transition logic")
 @export var priority : int = 0
-@export var stamina_cost : float = 0.0
+@export var ap_cost : int = 0
 @export var behaviour_map : Dictionary = {
 		"idle" : "idle",
 		"walk" : "walk",

@@ -1,7 +1,7 @@
 extends Node
 class_name PlayerResources
 
-# TODO heavily refactor, rn just copypasted the resource code
+signal action_points_changed(ap: int, max_ap: int)
 
 #region Core player properties
 @export var god_mode : bool
@@ -36,6 +36,11 @@ class_name PlayerResources
 @export var max_action_points: int
 #endregion
 
+@export var ap_per_meter_walk: float = 0.7   # 1 AP per 4m
+@export var ap_per_meter_run: float = 0.5     # 1 AP per 2m
+@export var ap_per_meter_crouch: float = 0.9  # 1 AP per 5m
+var _ap_meter_accum: float = 0.0
+
 #region Weapon system
 enum WeaponState { HOLSTERED, MELEE, PISTOL }
 @export var current_weapon_state: WeaponState
@@ -53,17 +58,77 @@ const RUN_SPEED: float = 5.0
 const SPRINT_SPEED: float = 7.0
 #endregion
 
+func _ready() -> void:
+	# Start with full AP when not in combat
+	if GameManager.game_state == GameManager.GameState.INVESTIGATION:
+		restore_action_points_full()
+
+	# Auto-restore when exiting combat
+	if GameManager.has_signal("game_state_changed"):
+		GameManager.game_state_changed.connect(_on_game_state_changed)
+
+func _on_game_state_changed(new_state: int, _reason: String) -> void:
+	if new_state == GameManager.GameState.INVESTIGATION:
+		restore_action_points_full()
 	
 func get_pos():
 	return global_position
 
+func get_ap_per_meter() -> float:
+	# You can use GameManager.move_mode, or your movement_mode string
+	match GameManager.move_mode:
+		GameManager.MoveMode.WALK:
+			return ap_per_meter_walk
+		GameManager.MoveMode.RUN:
+			return ap_per_meter_run
+		GameManager.MoveMode.CROUCH:
+			return ap_per_meter_crouch
+		_:
+			return ap_per_meter_run
 
-func toggle_movement_mode() -> void:
-	if movement_mode == "walk":
-		movement_mode = "run"
-	else:
-		movement_mode = "walk"
-	print("Movement mode switched to: ", movement_mode)
+func spend_ap_for_movement(distance_moved_meters: float) -> void:
+	# Only in combat
+	if GameManager.game_state != GameManager.GameState.COMBAT:
+		_ap_meter_accum = 0.0
+		return
+	if distance_moved_meters <= 0.0:
+		return
+
+	var ap_per_meter := get_ap_per_meter()
+	if ap_per_meter <= 0.0:
+		return
+
+	_ap_meter_accum += distance_moved_meters * ap_per_meter
+
+	# Spend whole AP points only
+	var to_spend := int(floor(_ap_meter_accum))
+	if to_spend <= 0:
+		return
+
+	var before := action_points
+	action_points = max(action_points - to_spend, 0)
+	_ap_meter_accum -= float(to_spend)
+
+	# Debug output
+	var mode_name = GameManager.MoveMode.keys()[GameManager.move_mode]
+	print(
+		"[AP] movement:",
+		mode_name,
+		"dist=", "%.2f" % distance_moved_meters,
+		"ap/m=", "%.2f" % ap_per_meter,
+		"spent=", to_spend,
+		"AP:", before, "->", action_points
+	)
+
+	action_points_changed.emit(action_points, max_action_points)
+
+func spend_action_points(amount: int) -> void:
+	if action_points > 0:
+		action_points -= amount
+
+func restore_action_points_full() -> void:
+	action_points = max_action_points
+	action_points_changed.emit(action_points, max_action_points)
 
 func get_movement_speed() -> float:
 	match movement_mode:
@@ -91,12 +156,10 @@ func level_up() -> void:
 
 
 func can_be_paid_behaviour(behaviour : TorsoBehaviour) -> bool:
-	# Check if we have enough ap to pay for the behavior if in combat mode
+	# Free outside combat
 	if GameManager.game_state == GameManager.GameState.INVESTIGATION:
 		return true
-	if action_points >= behaviour.ap_cost:
-		return true
-	return false
+	return action_points >= behaviour.ap_cost
 
 func take_damage(amount : float):
 	# Check invincibility (roll, i-frames, etc.)
