@@ -25,15 +25,14 @@ var aim: PlayerAim
 func on_enter_behaviour(_input: InputPackage) -> void:
 	if GameManager.game_state == GameManager.GameState.COMBAT:
 		player.player_model.resources.spend_action_points(ap_cost)
+	
 	_did_trigger = false
-	_refresh_target()
-	_target = player.current_interactable
+	_prepare_action_and_anim()
+	
 	aim = player.player_model.player_aim as PlayerAim
 	aim.set_target_node(_target, true)
-	_prepare_action_and_anim()
-
+	
 	_trigger_time = float(action_timing.get(action, 1.0))
-
 	if torso_anim_settings.current_animation == "simple":
 		simple_torso.play(animation_to_play, 0.15)
 	else:
@@ -52,60 +51,35 @@ func transition_logic(input: InputPackage) -> String:
 
 func setup_legs_animator(previous_action: LegsAction, _input: InputPackage) -> void:
 	# IMPORTANT: legs setup can be called BEFORE on_enter_behaviour,
-	# so ensure action/anim are prepared here too.
+	# so ensure we get the CURRENT target and prepare fresh animation data.
 	_prepare_action_and_anim()
-	_refresh_target()
+	
 	if previous_action.anim_settings == "simple":
 		legs.simple_animator.play(animation_to_play, 0.15)
 	else:
 		legs.simple_animator.play(animation_to_play, 0.0)
 		legs.legs_anim_settings.play("simple", 0.15)
 
-# -------------------------
-# Internals
-# -------------------------
 
-func _prepare_action_and_anim() -> void:
-	var t: Interactable = _target
-	if t == null:
-		t = player.current_interactable
-
-	action = _get_action_from_target(t)
-	animation_to_play = String(animation.get(action, "Interact"))
+func _prepare_action_and_anim() -> void:	
+	_target = player.current_interactable
+	action = _get_action_from_target(_target)
+	animation_to_play = String(animation.get(action))
 	duration = animations_source.get_animation(animation_to_play).get_length()
-	# Optional debug:
-	# print("[Interact] target=", t, " action=", action, " anim=", animation_to_play)
 
 func _get_action_from_target(i: Interactable) -> String:
-	var a := ""
-	if i != null:
-		a = String(i.default_action)
-	if a == "":
-		a = "interact"
-	return a
+	return String(i.default_action)
 
 func _do_interaction() -> void:
 	var t: Interactable = _target
-	if t == null:
-		t = player.current_interactable
-
-	if t == null or not is_instance_valid(t):
-		return
-
-	if t.has_method("can_interact") and not t.can_interact():
-		return
-
-	if t.has_method("trigger_interaction"):
-		t.trigger_interaction(action)
-		return
-
-	if t.has_signal("interaction_triggered"):
-		t.interaction_triggered.emit(player, action)
-
-func _refresh_target() -> void:
-	var t: Interactable = player.current_interactable
-	_target = t if (t != null and is_instance_valid(t)) else null
+	t.interaction_triggered.emit(player, action)
 
 func on_exit_behaviour():
 	super.on_exit_behaviour()
-	aim.clear_target()
+	# Clear target and state to prevent stale data on next interaction
+	_target = null
+	_did_trigger = false
+	action = ""
+	animation_to_play = ""
+	if aim:
+		aim.clear_target()

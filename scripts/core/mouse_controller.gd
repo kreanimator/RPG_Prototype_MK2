@@ -49,7 +49,7 @@ func collect_input() -> InputPackage:
 					new_input.actions.append("investigate")
 				
 				GameManager.MouseMode.INTERACT:
-					if player.current_interactable:
+					if player.current_interactable and player.current_interactable.can_interact():
 						new_input.actions.append("interact")
 
 	# Continuous move intent while travelling
