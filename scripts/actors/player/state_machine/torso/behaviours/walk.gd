@@ -1,6 +1,6 @@
 extends TorsoBehaviour
 
-@export var animation: String = "Walk"
+var animation: String = "Walk"
 
 
 func transition_logic(input : InputPackage) -> String:

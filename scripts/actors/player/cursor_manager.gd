@@ -4,12 +4,14 @@ class_name CursorUIManager
 const MODE_MOVE := 0
 const MODE_ATTACK := 1
 const MODE_INVESTIGATE := 2
+const MODE_INTERACT := 3
 
 const TARGET_POINT_PREFAB := preload("uid://d2dgudxyt8cox")
 
 const INVESTIGATE_ICON_IMAGE := preload("uid://cqcegply4vpah")
 const DEFAULT_ICON_IMAGE := preload("uid://bicbqbvb43he3")
 const ATTACK_ICON_IMAGE := preload("uid://mle7kd2qms8b")
+const INTERACT_ICON_IMAGE = preload("uid://4oue2xm12exg")
 
 @export var cursor_hotspot: Vector2 = Vector2.ZERO
 @export var cursor_shape: int = Input.CURSOR_ARROW
@@ -27,6 +29,7 @@ func _ready() -> void:
 		MODE_MOVE: DEFAULT_ICON_IMAGE,
 		MODE_ATTACK: ATTACK_ICON_IMAGE,
 		MODE_INVESTIGATE: INVESTIGATE_ICON_IMAGE,
+		MODE_INTERACT: INTERACT_ICON_IMAGE
 	}
 	_apply_cursor(_current_mode)
 

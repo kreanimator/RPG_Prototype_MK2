@@ -1,6 +1,6 @@
 extends TorsoBehaviour
 
-@export var animation: String = "Midair"
+var animation: String = "Midair"
 
 @export_range(0.1, 2.0, 0.1) var gravity_multiplier: float = 1.2
 const MOMENTUM_DECAY: float = 0.9  # Horizontal momentum decay when input is released

@@ -1,6 +1,6 @@
 extends TorsoBehaviour
 
-@export var animation: String = "Jog_Fwd"
+var animation: String = "Jog_Fwd"
 
 
 func transition_logic(input : InputPackage) -> String:
@@ -16,3 +16,4 @@ func on_enter_behaviour(_input : InputPackage):
 	else:
 		simple_torso.play(animation, 0)
 		torso_anim_settings.play("simple", 0.15)
+	

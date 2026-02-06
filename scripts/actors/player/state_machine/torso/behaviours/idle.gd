@@ -1,6 +1,6 @@
 extends TorsoBehaviour
 
-@export var animation: String = "Idle"
+var animation: String = "Idle"
 
 func transition_logic(input : InputPackage) -> String:
 	map_with_dictionary(input)

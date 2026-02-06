@@ -5,6 +5,10 @@
 [ext_resource type="Material" uid="uid://byyqusw3pol8q" path="res://resources/materials/test_obstacle.tres" id="3_fr1um"]
 [ext_resource type="Script" uid="uid://ns3w76hx155w" path="res://scripts/actors/enemy.gd" id="4_48ne7"]
 [ext_resource type="PackedScene" uid="uid://bukpe1wm5nsne" path="res://scenes/faction_component.tscn" id="5_6xh4u"]
+[ext_resource type="PackedScene" uid="uid://cpayioc2prtug" path="res://scenes/dummy_interactable.tscn" id="6_6xh4u"]
+[ext_resource type="Script" uid="uid://1bnpi0rs50co" path="res://scripts/dummy_interactable.gd" id="7_7x1jh"]
+[ext_resource type="PackedScene" uid="uid://cq1gygqlwqh4w" path="res://scenes/interactable.tscn" id="8_hfwtw"]
+[ext_resource type="Script" uid="uid://c7owhibtq16h4" path="res://scripts/dependant_dummy.gd" id="9_hfwtw"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_v45ci"]
 
@@ -26,6 +30,19 @@ agent_max_climb = 0.15
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_48ne7"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_6xh4u"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_2mu0v"]
+material = ExtResource("3_fr1um")
+size = Vector3(0.3, 0.3, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2mu0v"]
+albedo_color = Color(1, 1, 0, 1)
+emission_enabled = true
+emission = Color(1, 1, 0, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_jmx14"]
+material = SubResource("StandardMaterial3D_2mu0v")
 
 [node name="TestLevel" type="Node3D" unique_id=1311812362]
 
@@ -231,3 +248,28 @@ shape = SubResource("CapsuleShape3D_6xh4u")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="DummyEnemy" unique_id=1420669264]
 avoidance_enabled = true
+
+[node name="DummyInteractable" parent="." unique_id=2142339155 instance=ExtResource("6_6xh4u")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12782955, 0.3999981, 11.451701)
+action = "pick_up"
+
+[node name="DummyButton" type="Node3D" parent="." unique_id=2124759083 node_paths=PackedStringArray("dependant")]
+transform = Transform3D(1, 0, 0, 0, 0.99977297, 0.021308858, 0, -0.021308858, 0.99977297, 5.2894545, 1.0269055, 0)
+script = ExtResource("7_7x1jh")
+destroy_on_interact = false
+action = "interact"
+dependant = NodePath("../Dependant")
+
+[node name="Interactable" parent="DummyButton" unique_id=1752676774 instance=ExtResource("8_hfwtw")]
+interaction_zone_size = 1.5
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="DummyButton" unique_id=939376212]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2509961, 0.53422666, 0.011386346)
+mesh = SubResource("BoxMesh_2mu0v")
+
+[node name="Dependant" type="Node3D" parent="." unique_id=1578050425]
+script = ExtResource("9_hfwtw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Dependant" unique_id=1594215806]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.3642235, 2.0029826, -5.3000784)
+mesh = SubResource("BoxMesh_jmx14")

@@ -5,6 +5,7 @@ class_name Actor
 @onready var nav_agent: NavigationAgent3D = get_node_or_null("NavigationAgent3D")
 @onready var faction_component: FactionComponent = get_node_or_null("FactionComponent")
 
+var current_interactable: Interactable = null
 
 func set_target_position(pos: Vector3) -> void:
 	if nav_agent == null:
@@ -51,3 +52,10 @@ func get_interaction_info(requester: Actor = null) -> Dictionary:
 		info["disposition"] = FactionComponent.Disposition.keys()[disp].to_lower()
 
 	return info
+
+func set_current_interactable(i: Interactable) -> void:
+	current_interactable = i
+
+func clear_current_interactable(i: Interactable) -> void:
+	if current_interactable == i:
+		current_interactable = null

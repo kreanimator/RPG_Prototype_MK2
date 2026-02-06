@@ -120,9 +120,21 @@ func spend_ap_for_movement(distance_moved_meters: float) -> void:
 
 	action_points_changed.emit(action_points, max_action_points)
 
-func spend_action_points(amount: int) -> void:
-	if action_points > 0:
-		action_points -= amount
+func spend_action_points(amount: int) -> bool:
+	if GameManager.game_state != GameManager.GameState.COMBAT:
+		return true # free outside combat (optional)
+
+	amount = max(amount, 0)
+	if action_points < amount:
+		print("[AP] NOT ENOUGH: need=", amount, " have=", action_points)
+		return false
+
+	var before := action_points
+	action_points -= amount
+	print("[AP] spend:", amount, " AP:", before, "->", action_points)
+
+	action_points_changed.emit(action_points, max_action_points)
+	return true
 
 func restore_action_points_full() -> void:
 	action_points = max_action_points
