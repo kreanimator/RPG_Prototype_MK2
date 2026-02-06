@@ -1,7 +1,7 @@
 extends LegsAction
 
 @export var animation: String = "Jog_Fwd"
-@export var move_speed: float = 7.0
+var move_speed
 @export var turn_speed: float = 12.0
 
 @export var min_move_to_charge: float = 0.01
@@ -39,8 +39,8 @@ func _charge_ap_by_distance() -> void:
 	player.player_model.resources.spend_ap_for_movement(dist)
 
 func velocity_by_nav(delta: float) -> Vector3:
+	move_speed = player.player_model.resources.RUN_SPEED
 	var new_velocity := player.velocity
-
 	if not player.is_on_floor():
 		new_velocity.y += gravity * delta
 	else:

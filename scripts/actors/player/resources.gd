@@ -31,15 +31,13 @@ signal action_points_changed(ap: int, max_ap: int)
 #endregion
 
 #region Movement settings
-@export var movement_mode: String
 @export var action_points: int
 @export var max_action_points: int
-#endregion
-
 @export var ap_per_meter_walk: float = 0.7   # 1 AP per 4m
 @export var ap_per_meter_run: float = 0.5     # 1 AP per 2m
 @export var ap_per_meter_crouch: float = 0.9  # 1 AP per 5m
 var _ap_meter_accum: float = 0.0
+#endregion
 
 #region Weapon system
 enum WeaponState { HOLSTERED, MELEE, PISTOL }
@@ -55,7 +53,7 @@ var is_invincible : bool = false  # Invincibility flag (e.g., during roll)
 #region Constants
 const WALK_SPEED : float = 3.5
 const RUN_SPEED: float = 5.0
-const SPRINT_SPEED: float = 7.0
+const CROUCH_SPEED: float = 7.0
 #endregion
 
 func _ready() -> void:
@@ -130,14 +128,14 @@ func restore_action_points_full() -> void:
 	action_points = max_action_points
 	action_points_changed.emit(action_points, max_action_points)
 
-func get_movement_speed() -> float:
+func get_movement_speed(movement_mode: String) -> float:
 	match movement_mode:
 		"walk":
 			return WALK_SPEED
 		"run":
 			return RUN_SPEED
 		"sprint":
-			return SPRINT_SPEED
+			return CROUCH_SPEED
 		_:
 			return WALK_SPEED
 
