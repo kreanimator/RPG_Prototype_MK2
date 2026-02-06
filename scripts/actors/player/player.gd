@@ -17,9 +17,6 @@ func _ready() -> void:
 	set_nav_agent()
 	faction_component.faction = faction_component.Faction.PLAYER
 	
-#### FIXME: Need to move movement logic to states, example:
-#### pass nav agent and target position to state so state machine can use it
-
 func _physics_process(delta: float) -> void:
 	var input = player_input.collect_input()
 	player_model.update(input, delta)
