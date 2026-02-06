@@ -23,7 +23,7 @@ func set_nav_agent(radius: float = 0.75,
 	nav_agent.target_desired_distance = target_des_distance
 	nav_agent.avoidance_enabled = true
 	nav_agent.avoidance_priority = 1.0
-
+	
 func is_hostile_to(other: Actor) -> bool:
 	if other == null:
 		return false

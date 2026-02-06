@@ -37,6 +37,9 @@ debug_color = Color(0.92640823, 0.2510672, 0.27369165, 0.41960785)
 path_desired_distance = 0.75
 target_desired_distance = 0.75
 avoidance_enabled = true
+radius = 1.0
+avoidance_layers = 15
+avoidance_mask = 15
 debug_enabled = true
 debug_path_custom_color = Color(1, 0.07058824, 0.019607844, 1)
 

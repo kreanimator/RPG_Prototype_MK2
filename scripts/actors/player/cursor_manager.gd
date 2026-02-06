@@ -99,6 +99,7 @@ func set_hover_actor(node: Node) -> void:
 	# And apply highlight to new hover here (optional).
 
 func _on_hover_changed(hit: Dictionary) -> void:
+	#var prev_mouse_mode: GameManager.MouseMode = GameManager.mouse_mode
 	if hit.is_empty():
 		set_hover_actor(null)
 		set_cursor_mode(MODE_MOVE)
@@ -123,9 +124,13 @@ func _on_hover_changed(hit: Dictionary) -> void:
 	var player_actor := get_tree().get_first_node_in_group("player") as Actor
 	if player_actor != null and actor.is_hostile_to(player_actor):
 		set_cursor_mode(MODE_ATTACK)
+		#GameManager.mouse_mode = GameManager.MouseMode.ATTACK
 	else:
 		# non-hostile actor: investigate (or move, your choice)
 		set_cursor_mode(MODE_INVESTIGATE)
+		#GameManager.mouse_mode = GameManager.MouseMode.INVESTIGATE
+		
+	#GameManager.mouse_mode = prev_mouse_mode
 
 func _on_clicked(hit: Dictionary) -> void:
 	if hit.has("position"):

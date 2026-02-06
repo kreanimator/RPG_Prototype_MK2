@@ -3,9 +3,6 @@ class_name InputCollector
 
 @onready var player: Player = $".."
 
-enum MouseMode { MOVE, ATTACK, INVESTIGATE }
-var mouse_mode: MouseMode = MouseMode.MOVE
-
 var _pending_right_click := false
 var _pending_left_click := false
 var _pending_mouse_pos := Vector2.ZERO
@@ -22,7 +19,7 @@ func collect_input() -> InputPackage:
 	if _pending_right_click:
 		_pending_right_click = false
 		_cycle_mouse_mode()
-		player.player_visuals.cursor_manager.set_cursor_mode(mouse_mode)
+		player.player_visuals.cursor_manager.set_cursor_mode(GameManager.mouse_mode)
 
 	# Left click: set intent / target
 	if _pending_left_click:
@@ -34,8 +31,8 @@ func collect_input() -> InputPackage:
 			new_input.click_surface_rotation = result["normal"]
 			new_input.has_click_world_pos = true
 
-			match mouse_mode:
-				MouseMode.MOVE:
+			match GameManager.mouse_mode:
+				GameManager.MouseMode.MOVE:
 					_move_active = true
 					_move_target = new_input.click_world_pos
 					_move_normal = new_input.click_surface_rotation
@@ -44,10 +41,11 @@ func collect_input() -> InputPackage:
 					player.set_target_position(_move_target)
 					player.player_visuals.cursor_manager.show_target_point(_move_target, _move_normal)
 
-				MouseMode.ATTACK:
+				GameManager.MouseMode.ATTACK:
+					print("Attack action appended!")
 					new_input.actions.append("attack")
 
-				MouseMode.INVESTIGATE:
+				GameManager.MouseMode.INVESTIGATE:
 					new_input.actions.append("investigate")
 
 	# Continuous move intent while travelling
@@ -80,5 +78,5 @@ func _input(event: InputEvent) -> void:
 
 
 func _cycle_mouse_mode() -> void:
-	mouse_mode = (int(mouse_mode) + 1) % MouseMode.keys().size() as MouseMode
-	print("mouse_mode:", MouseMode.keys()[mouse_mode])
+	GameManager.mouse_mode = (int(GameManager.mouse_mode) + 1) % GameManager.MouseMode.keys().size() as GameManager.MouseMode
+	print("mouse_mode:", GameManager.MouseMode.keys()[GameManager.mouse_mode])
