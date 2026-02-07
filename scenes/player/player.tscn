@@ -8,7 +8,6 @@
 [ext_resource type="Script" uid="uid://vvntcqc73dcj" path="res://scripts/inventory_system/stats_manager.gd" id="6_qek5x"]
 [ext_resource type="Script" uid="uid://ygi133mje6oj" path="res://scripts/inventory_system/equipment_manager.gd" id="7_5gtgg"]
 [ext_resource type="PackedScene" uid="uid://bukpe1wm5nsne" path="res://scenes/faction_component.tscn" id="8_qek5x"]
-[ext_resource type="Script" uid="uid://dsita382gglbe" path="res://scripts/core/mouse_interactor.gd" id="9_5gtgg"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_p47bc"]
 radius = 0.3564453
@@ -22,9 +21,6 @@ script = ExtResource("1_8afob")
 [node name="PlayerModel" parent="." unique_id=1612628095 instance=ExtResource("2_gmlin")]
 
 [node name="PlayerVisuals" parent="." unique_id=925292958 instance=ExtResource("3_lvxji")]
-
-[node name="MouseInteractor" type="Node3D" parent="." unique_id=932931299]
-script = ExtResource("9_5gtgg")
 
 [node name="InputController" type="Node" parent="." unique_id=1552446271]
 script = ExtResource("2_p47bc")

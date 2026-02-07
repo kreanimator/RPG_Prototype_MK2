@@ -19,7 +19,7 @@ var game_state: GameState = GameState.INVESTIGATION:
 
 var move_mode: MoveMode = MoveMode.RUN
 var mouse_mode: MouseMode = MouseMode.MOVE
-
+var can_perform_action: bool = true
 var _last_reason: String = "init"
 
 func enter_combat(reason: String = "unknown") -> void:
@@ -29,6 +29,7 @@ func enter_combat(reason: String = "unknown") -> void:
 func exit_combat(reason: String = "unknown") -> void:
 	_last_reason = reason
 	game_state = GameState.INVESTIGATION
+	can_perform_action = true
 
 func toggle_combat(reason: String = "ui_toggle") -> void:
 	if game_state == GameState.COMBAT:

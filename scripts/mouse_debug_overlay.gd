@@ -1,7 +1,6 @@
 extends Control
 class_name MouseDebugOverlay
 
-var mouse_interactor: MouseInteractor
 @onready var player_visuals: PlayerVisuals = $"../.."
 
 var label: Label
@@ -17,9 +16,6 @@ func _process(_delta: float) -> void:
 	# follow mouse
 	label.position = get_viewport().get_mouse_position() + Vector2(16, 16)
 
-func set_mousw_interactor(interactor: MouseInteractor):
-	mouse_interactor = interactor
-	mouse_interactor.hover_changed.connect(_on_hover_changed)
 	
 func _on_hover_changed(hit: Dictionary) -> void:
 	if hit.is_empty():

@@ -20,7 +20,6 @@ const INTERACT_ICON_IMAGE = preload("uid://4oue2xm12exg")
 var _cursor_by_mode: Dictionary = {} # int -> Texture2D
 var _current_mode: int = MODE_MOVE
 
-var mouse_interactor: MouseInteractor = null
 var _target_point: Node3D = null
 var _hover_actor: Node = null # Visual only (highlight/tooltip later)
 
@@ -32,15 +31,6 @@ func _ready() -> void:
 		MODE_INTERACT: INTERACT_ICON_IMAGE
 	}
 	_apply_cursor(_current_mode)
-
-func bind(interactor: MouseInteractor) -> void:
-	mouse_interactor = interactor
-	if mouse_interactor == null:
-		return
-
-	# Hover does NOT change cursor mode.
-	mouse_interactor.hover_changed.connect(_on_hover_changed)
-	mouse_interactor.clicked.connect(_on_clicked)
 
 func set_cursor_mode(mode: int) -> void:
 	if mode == _current_mode:

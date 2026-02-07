@@ -78,4 +78,4 @@ func acts_between(start : float, finish : float) -> bool:
 #endregion
 
 func _is_out_of_ap() -> bool:
-	return player.player_model.resources.action_points <= 0
+	return player.player_model.resources.is_out_of_ap()

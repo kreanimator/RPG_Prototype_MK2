@@ -122,11 +122,14 @@ func spend_ap_for_movement(distance_moved_meters: float) -> void:
 
 func spend_action_points(amount: int) -> bool:
 	if GameManager.game_state != GameManager.GameState.COMBAT:
+		GameManager.can_perform_action = true
 		return true # free outside combat (optional)
 
 	amount = max(amount, 0)
 	if action_points < amount:
 		print("[AP] NOT ENOUGH: need=", amount, " have=", action_points)
+		GameManager.can_perform_action = false
+		_stop_player_navigation()
 		return false
 
 	var before := action_points
@@ -195,3 +198,25 @@ func gain_health(amount : float):
 		health += amount
 	else:
 		health = max_health
+
+func is_out_of_ap() -> bool:
+	if action_points <= 0:
+		GameManager.can_perform_action = false
+		_stop_player_navigation()
+		return true
+	return false
+
+func _stop_player_navigation() -> void:
+	"""Stop player navigation and clear visual indicators when AP runs out."""
+	if not model or not model.player:
+		return
+	
+	var player = model.player
+	
+	# Stop navigation by setting target to current position
+	if player.nav_agent:
+		player.nav_agent.target_position = player.global_position
+	
+	# Clear visual target indicator
+	if player.player_visuals and player.player_visuals.cursor_manager:
+		player.player_visuals.cursor_manager.hide_target_point()

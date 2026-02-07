@@ -6,11 +6,6 @@ class_name PlayerVisuals
 @onready var mouse_debug_overlay: MouseDebugOverlay = $UI/MouseDebugOverlay
 @onready var ui_controller: UIController = $UI/UIController
 
-func bind_mouse_interactor(interactor: MouseInteractor) -> void:
-	if cursor_manager:
-		cursor_manager.bind(interactor)
-	if mouse_debug_overlay:
-		mouse_debug_overlay.set_mousw_interactor(interactor)
 
 func accept_model(_model: PlayerModel) -> void:
 	model = _model

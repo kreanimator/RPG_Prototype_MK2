@@ -22,7 +22,7 @@ func collect_input() -> InputPackage:
 		player.player_visuals.cursor_manager.set_cursor_mode(GameManager.mouse_mode)
 
 	# Left click: set intent / target
-	if _pending_left_click:
+	if _pending_left_click and GameManager.can_perform_action:
 		_pending_left_click = false
 
 		var result = Utils.get_camera_raycast_from_mouse(_pending_mouse_pos, player.camera_node.cam, 1)
@@ -51,6 +51,10 @@ func collect_input() -> InputPackage:
 				GameManager.MouseMode.INTERACT:
 					if player.current_interactable and player.current_interactable.can_interact():
 						new_input.actions.append("interact")
+	
+	# Clear pending click if action was blocked
+	elif _pending_left_click:
+		_pending_left_click = false
 
 	# Continuous move intent while travelling
 	if _move_active:

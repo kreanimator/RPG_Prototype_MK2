@@ -11,7 +11,7 @@ const MIN_MASS_RATIO: float = 0.1
 @onready var player_input: InputCollector = $InputController
 @onready var player_model: PlayerModel = $PlayerModel
 @onready var player_visuals: PlayerVisuals = $PlayerVisuals
-@onready var mouse_interactor: MouseInteractor = $MouseInteractor
+#@onready var mouse_interactor: MouseInteractor = $MouseInteractor
 @onready var inventory_manager: InventoryManager = $InventoryManager
 @onready var stats_manager: StatsManager = $StatsManager
 @onready var equipment_manager: EquipmentManager = $EquipmentManager
@@ -30,7 +30,6 @@ func _physics_process(delta: float) -> void:
 
 func setup_visuals() -> void:
 	player_visuals.accept_model(player_model)
-	player_visuals.bind_mouse_interactor(mouse_interactor)
 	
 func _push_rigid_bodies():
 	for i in get_slide_collision_count():

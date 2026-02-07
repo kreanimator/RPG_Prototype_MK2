@@ -342,6 +342,7 @@ grow_vertical = 0
 layout_mode = 2
 
 [node name="MouseDebugOverlay" type="Control" parent="UI" unique_id=1831090648]
+visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
