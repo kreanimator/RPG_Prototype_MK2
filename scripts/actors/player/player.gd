@@ -10,11 +10,12 @@ const MIN_MASS_RATIO: float = 0.1
 
 @onready var player_input: InputCollector = $InputController
 @onready var player_model: PlayerModel = $PlayerModel
-@onready var player_visuals: PlayerVisuals = $PlayerVisuals
+#@onready var player_visuals: PlayerVisuals = $PlayerVisuals
 #@onready var mouse_interactor: MouseInteractor = $MouseInteractor
 @onready var inventory_manager: InventoryManager = $InventoryManager
 @onready var stats_manager: StatsManager = $StatsManager
 @onready var equipment_manager: EquipmentManager = $EquipmentManager
+@onready var player_visuals: PlayerVisuals = $PlayerVisuals
 
 
 func _ready() -> void:

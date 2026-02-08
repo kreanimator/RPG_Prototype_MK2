@@ -1,4 +1,4 @@
-extends Node3D
+extends Area3D
 class_name Interactable
 
 signal actor_entered(actor: Actor)
@@ -9,8 +9,8 @@ signal interaction_triggered(actor: Actor, action: String)
 @export var default_action: String = "" # pick_up / pick_up_table / interact
 @export var interaction_actions: Array[String] = []  # List of available actions
 
-@onready var interaction_area: Area3D = $InteractionArea
-@onready var interaction_zone: CollisionShape3D = $InteractionArea/InteractionZone
+#@onready var interaction_area: Area3D = $InteractionArea
+@onready var interaction_zone: CollisionShape3D = $InteractionZone
 
 var current_actor: Actor = null
 var is_actor_in_range: bool = false
@@ -18,14 +18,14 @@ var is_actor_in_range: bool = false
 func _ready() -> void:
 	interaction_zone.shape = interaction_zone.shape.duplicate()
 	interaction_zone.shape.radius = interaction_zone_size
-	interaction_area.body_entered.connect(_on_body_entered)
-	interaction_area.body_exited.connect(_on_body_exited)
+	body_entered.connect(_on_body_entered)
+	body_exited.connect(_on_body_exited)
 
 func _on_body_entered(body: Node) -> void:
 	if body is Actor:
 		current_actor = body
 		is_actor_in_range = true
-		body.set_current_interactable(self)
+		#body.set_current_interactable(self)
 		actor_entered.emit(body)
 		
 		print("Actor entered interaction area: ", body.name)
@@ -34,7 +34,7 @@ func _on_body_exited(body: Node) -> void:
 	if body is Actor:
 		current_actor = body
 		is_actor_in_range = false
-		body.clear_current_interactable(self)
+		#body.clear_current_interactable(self)
 		actor_exited.emit(body)
 		
 		print("Player exited interaction area: ", body.name)

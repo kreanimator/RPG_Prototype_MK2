@@ -95,11 +95,13 @@ func _is_interactive_type(control: Control) -> bool:
 		   control is OptionButton or control is CheckBox or control is CheckButton or \
 		   control is ColorPicker or control is SpinBox or control is Slider
 
-func get_camera_raycast_from_mouse(mouse_pos: Vector2, camera: Camera3D, collission_mask: int= 42):
+func get_camera_raycast_from_mouse(mouse_pos: Vector2, camera: Camera3D, collide_with_bodies = true, collide_with_areas = false, collission_mask: int= 42):
 	var from = camera.project_ray_origin(mouse_pos)
 	var to = from + camera.project_ray_normal(mouse_pos) * 1000
 	var query = PhysicsRayQueryParameters3D.new()
 	query.from = from; query.to = to; query.collision_mask = collission_mask
+	query.collide_with_areas = collide_with_areas
+	query.collide_with_bodies = collide_with_bodies
 	var space_state = get_world_3d().direct_space_state
 	var result = space_state.intersect_ray(query)
 	if result.size() > 0: return result 

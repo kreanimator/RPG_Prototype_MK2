@@ -2,12 +2,9 @@ extends Node
 class_name PlayerModel
 
 
-@export var player : Player
+
 #@export var interaction_manager: InteractionManager
 @export var stats_manager: StatsManager
-var inventory_manager: InventoryManager
-var equipment_manager: EquipmentManager
-
 @onready var combat = $Combat as HumanoidCombat
 @onready var skeleton = %GeneralSkeleton as Skeleton3D
 @onready var torso_machine = $Torso as TorsoMachine
@@ -17,10 +14,11 @@ var equipment_manager: EquipmentManager
 @onready var resources = $Resources as PlayerResources
 @onready var active_weapon : Weapon
 @onready var weapon_socket_ra: Node3D = $RightWrist/WeaponSocketRA
-#@onready var head_socket: Node3D = $Head/HelmetSocket
-
 @onready var skeleton_animator: AnimationPlayer = $SkeletonAnimator
 
+var player : Player
+var inventory_manager: InventoryManager
+var equipment_manager: EquipmentManager
 var current_behaviour : TorsoBehaviour
 
 func _ready():
