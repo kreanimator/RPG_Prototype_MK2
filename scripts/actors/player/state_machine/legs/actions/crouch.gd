@@ -1,7 +1,7 @@
 extends LegsAction
 
 @export var animation: String = "Crouch_Fwd"
-@export var move_speed: float = 3.0
+@export var move_speed: float = 2.0
 @export var turn_speed: float = 6.0
 
 @export var min_move_to_charge: float = 0.01

@@ -7,7 +7,7 @@ func transition_logic(input : InputPackage) -> String:
 	map_with_dictionary(input)
 		# stop -> switch to idle (input can also drive this; this is a safe fallback)
 	if player.nav_agent.is_navigation_finished():
-		return "idle"
+		return "crouch_idle"
 	return best_input_that_can_be_paid(input)
 
 func on_enter_behaviour(_input : InputPackage):

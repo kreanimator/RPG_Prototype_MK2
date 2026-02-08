@@ -67,6 +67,8 @@ func collect_input() -> InputPackage:
 
 	# Default
 	if new_input.actions.is_empty():
+		if GameManager.move_mode == GameManager.MoveMode.CROUCH:
+			new_input.actions.append("crouch_idle")
 		new_input.actions.append("idle")
 
 	return new_input

@@ -12,6 +12,7 @@ class_name TorsoBehaviour
 		"walk" : "walk",
 		"run" : "run",
 		"crouch" : "crouch",
+		"crouch_idle": "crouch_idle",
 		"interact": "interact"
 	}
 @export var interrupted_by_fall : bool = true
