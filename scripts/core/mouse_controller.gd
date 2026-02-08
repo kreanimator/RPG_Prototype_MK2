@@ -15,11 +15,6 @@ var _pending_right_click := false
 var _pending_left_click := false
 var _pending_mouse_pos := Vector2.ZERO
 
-# latch movement intent
-var _move_active := false
-var _move_target := Vector3.ZERO
-var _move_normal := Vector3.UP
-
 func collect_input() -> InputPackage:
 	var new_input := InputPackage.new()
 
@@ -44,13 +39,14 @@ func collect_input() -> InputPackage:
 	elif _pending_left_click:
 		_pending_left_click = false
 
-	# Continuous move intent while travelling
-	if _move_active:
-		if player.nav_agent.is_navigation_finished():
-			_move_active = false
-		else:
-			var mode_name = GameManager.MoveMode.keys()[GameManager.move_mode].to_lower()
-			new_input.actions.append(mode_name)
+	# Check if action resolver is executing an intent
+	var action_resolver = player.player_model.action_resolver as ActionResolver
+	if action_resolver and action_resolver.is_executing():
+		var action = action_resolver.get_current_action_for_input()
+		if action != "":
+			new_input.actions.append(action)
+			# Don't add default idle when resolver is active
+			return new_input
 
 	# Default
 	if new_input.actions.is_empty():
@@ -62,7 +58,7 @@ func collect_input() -> InputPackage:
 
 
 func _handle_interact_click(new_input: InputPackage) -> void:
-	# Raycast for Area3D interactables (collide_with_areas must be true)
+	# Raycast for Area3D interactables
 	var hit = Utils.get_camera_raycast_from_mouse(
 		_pending_mouse_pos,
 		player.camera_node.cam,
@@ -73,14 +69,12 @@ func _handle_interact_click(new_input: InputPackage) -> void:
 
 	if hit and hit.has("collider") and hit["collider"] is Interactable:
 		var inter := hit["collider"] as Interactable
-		player.current_interactable = inter
-		if inter.can_interact():
-			new_input.actions.append("interact")
+		# Create interact intent instead of direct action
+		var intent = ActionIntent.create_interact_intent(inter, player)
+		var action_resolver = player.player_model.action_resolver as ActionResolver
+		if action_resolver:
+			action_resolver.set_intent(intent)
 		return
-
-	## Fallback: if you're already in range of something, allow interact without ray hit
-	#if player.current_interactable and player.current_interactable.can_interact():
-		#new_input.actions.append("interact")
 
 
 func _handle_world_click(new_input: InputPackage) -> void:
@@ -102,12 +96,20 @@ func _handle_world_click(new_input: InputPackage) -> void:
 
 	match GameManager.mouse_mode:
 		GameManager.MouseMode.MOVE:
-			_move_active = true
-			_move_target = new_input.click_world_pos
-			_move_normal = new_input.click_surface_rotation
-
-			player.set_target_position(_move_target)
-			player.player_visuals.cursor_manager.show_target_point(_move_target, _move_normal)
+			# Create move intent
+			var intent = ActionIntent.create_move_intent(
+				result["position"],
+				result["normal"]
+			)
+			var action_resolver = player.player_model.action_resolver as ActionResolver
+			if action_resolver:
+				action_resolver.set_intent(intent)
+			
+			# Show target point
+			player.player_visuals.cursor_manager.show_target_point(
+				result["position"],
+				result["normal"]
+			)
 
 		GameManager.MouseMode.ATTACK:
 			new_input.actions.append("attack")

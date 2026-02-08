@@ -12,6 +12,7 @@ class_name PlayerModel
 @onready var area_awareness = $AreaAwareness as AreaAwareness
 @onready var player_aim = $PlayerAim as PlayerAim
 @onready var resources = $Resources as PlayerResources
+@onready var action_resolver = $ActionResolver as ActionResolver
 @onready var active_weapon : Weapon
 @onready var weapon_socket_ra: Node3D = $RightWrist/WeaponSocketRA
 @onready var skeleton_animator: AnimationPlayer = $SkeletonAnimator
@@ -77,6 +78,9 @@ func update(input : InputPackage, delta : float):
 	area_awareness.contextualize(input)
 	#interaction_manager.contextualize(input)
 	
+	# Update action resolver
+	if action_resolver:
+		action_resolver.update(delta)
 	## Get active weapon from equipment manager if available, otherwise from socket
 	#if equipment_manager and equipment_manager.current_weapon and is_instance_valid(equipment_manager.current_weapon):
 		#active_weapon = equipment_manager.current_weapon
