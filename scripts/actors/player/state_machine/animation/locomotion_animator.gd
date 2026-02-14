@@ -80,7 +80,7 @@ func _ready():
 	
 	prev_directions_spectre = curr_directions_spectre
 	#Utils.print_animation_info("Idle", animations_source)
-	Utils.print_all_animations_tracks(animations_source)
+	#Utils.print_all_animations_tracks(animations_source)
 
 # too much func arguments, TODO think up a DTO or smth, this is cringe
 func transition(to_spectre : Dictionary, over_time = 0, first_direction : Vector2 = Vector2.ZERO, static_dir : bool = false):

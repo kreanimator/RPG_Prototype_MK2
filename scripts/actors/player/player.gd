@@ -20,6 +20,8 @@ const MIN_MASS_RATIO: float = 0.1
 
 func _ready() -> void:
 	setup_visuals()
+	setup_model()
+	setup_inventory()
 	set_nav_agent()
 	faction_component.faction = faction_component.Faction.PLAYER
 	
@@ -29,9 +31,66 @@ func _physics_process(delta: float) -> void:
 	input.queue_free()
 	_push_rigid_bodies()
 
+func setup_model() -> void:
+	stats_manager.set_model(player_model)
+
+func setup_inventory() -> void:
+	# Connect InventoryManager and StatsManager
+	inventory_manager.set_stats_manager(stats_manager)
+	stats_manager.set_inventory_manager(inventory_manager)
+	
+	# Connect EquipmentManager to StatsManager and InventoryManager
+	equipment_manager.set_stats_manager(stats_manager)
+	equipment_manager.set_inventory_manager(inventory_manager)
+	equipment_manager.set_player_model(player_model)
+	stats_manager.set_equipment_manager(equipment_manager)
+	
+	# Connect equipment signals
+	equipment_manager.equipment_changed.connect(_on_equipment_changed)
+	equipment_manager.weapon_equipped.connect(_on_weapon_equipped)
+	equipment_manager.weapon_unequipped.connect(_on_weapon_unequipped)
+	equipment_manager.active_slot_changed.connect(_on_active_slot_changed)
+	
+	## Connect InventoryUI to InventoryManager, EquipmentManager and StatsManager
+	#if player_visuals and player_visuals.inventory:
+		#player_visuals.inventory.set_inventory_manager(inventory_manager)
+		#player_visuals.inventory.set_equipment_manager(equipment_manager)
+		#player_visuals.inventory.set_stats_manager(stats_manager)
+		#player_visuals.inventory.set_player_resources(player_model.resources)
+		#print("Connected InventoryUI to InventoryManager, EquipmentManager and StatsManager")
+
+
 func setup_visuals() -> void:
 	player_visuals.accept_model(player_model)
-	
+
+
+func _on_equipment_changed() -> void:
+	# Update active weapon when equipment changes
+	if equipment_manager:
+		equipment_manager._switch_to_slot(equipment_manager.current_active_slot)
+
+func _on_weapon_equipped(slot: String, _weapon: Weapon) -> void:
+	# Weapon was equipped, switch to it if it's the active slot
+	if equipment_manager and slot == equipment_manager.current_active_slot:
+		equipment_manager._switch_to_slot(slot)
+
+func _on_weapon_unequipped(slot: String) -> void:
+	# Weapon was unequipped, if it was active, switch to other slot or unarmed
+	if equipment_manager and slot == equipment_manager.current_active_slot:
+		# Try to switch to other slot
+		var other_slot = "WEAPON_2" if slot == "WEAPON_1" else "WEAPON_1"
+		if equipment_manager.is_slot_equipped(other_slot):
+			equipment_manager.switch_weapon_slot(other_slot)
+		else:
+			# Both slots empty, go unarmed
+			equipment_manager._switch_to_slot(slot)
+
+func _on_active_slot_changed(slot: String) -> void:
+	# Active slot changed, update active weapon
+	if equipment_manager:
+		equipment_manager._switch_to_slot(slot)
+
+
 func _push_rigid_bodies():
 	for i in get_slide_collision_count():
 		var c := get_slide_collision(i)

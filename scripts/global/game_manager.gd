@@ -22,6 +22,33 @@ var mouse_mode: MouseMode = MouseMode.MOVE
 var can_perform_action: bool = true
 var _last_reason: String = "init"
 
+# --- Game Data Catalogs ---
+var items_catalog: Dictionary = {}
+var items_catalog_path: String = "res://data/items/items.json"
+var catalog_loaded: bool = false
+
+func _ready() -> void:
+	_load_items_catalog()
+
+#region ----- Catalog Loading -----
+func _load_items_catalog() -> void:
+	var items_data: Dictionary = File.load_json_file(items_catalog_path)
+	items_catalog = items_data.get("items", {}) as Dictionary
+	catalog_loaded = true
+	print("[GameManager] Loaded ", items_catalog.size(), " items from catalog")
+
+func get_items_catalog() -> Dictionary:
+	if not catalog_loaded:
+		_load_items_catalog()
+	return items_catalog
+
+func get_item_base(catalog_id: String) -> Dictionary:
+	if not catalog_loaded:
+		_load_items_catalog()
+	return items_catalog.get(catalog_id, {}) as Dictionary
+#endregion
+
+
 func enter_combat(reason: String = "unknown") -> void:
 	_last_reason = reason
 	game_state = GameState.COMBAT

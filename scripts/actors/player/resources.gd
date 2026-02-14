@@ -68,12 +68,15 @@ func _ready() -> void:
 	# Auto-restore when exiting combat
 	if GameManager.has_signal("game_state_changed"):
 		GameManager.game_state_changed.connect(_on_game_state_changed)
-
+		
+func update(delta : float):
+	pass
+	
 func _init_stats(sm: StatsManager, im: InventoryManager = null, em: EquipmentManager = null):
 	stats_manager = sm
 	inventory_manager = im
 	equipment_manager = em
-	
+	print("[Resources init] path=", get_path(), " em=", equipment_manager, " player=", model.player if model else null)
 	var initial_stats: Dictionary = sm.get_stats()
 	from_dict(initial_stats)
 	
@@ -188,6 +191,8 @@ func can_be_paid_behaviour(behaviour : TorsoBehaviour) -> bool:
 	# Free outside combat
 	if GameManager.game_state == GameManager.GameState.INVESTIGATION:
 		return true
+	if behaviour.behaviour_name == "attack" and !equipment_manager.current_weapon:
+		return action_points >= stats_manager.get_unarmed_action_cost()
 	return action_points >= behaviour.ap_cost
 
 func take_damage(amount : float):
