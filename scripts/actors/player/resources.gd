@@ -56,6 +56,10 @@ const RUN_SPEED: float = 5.0
 const CROUCH_SPEED: float = 7.0
 #endregion
 
+var stats_manager: StatsManager
+var inventory_manager: InventoryManager
+var equipment_manager: EquipmentManager
+
 func _ready() -> void:
 	# Start with full AP when not in combat
 	if GameManager.game_state == GameManager.GameState.INVESTIGATION:
@@ -64,6 +68,18 @@ func _ready() -> void:
 	# Auto-restore when exiting combat
 	if GameManager.has_signal("game_state_changed"):
 		GameManager.game_state_changed.connect(_on_game_state_changed)
+
+func _init_stats(sm: StatsManager, im: InventoryManager = null, em: EquipmentManager = null):
+	stats_manager = sm
+	inventory_manager = im
+	equipment_manager = em
+	
+	var initial_stats: Dictionary = sm.get_stats()
+	from_dict(initial_stats)
+	
+	# Sync weight from InventoryManager after loading
+	#if inventory_manager:
+		#_sync_weight_from_manager()
 
 func _on_game_state_changed(new_state: int, _reason: String) -> void:
 	if new_state == GameManager.GameState.INVESTIGATION:
@@ -220,3 +236,77 @@ func _stop_player_navigation() -> void:
 	# Clear visual target indicator
 	if player.player_visuals and player.player_visuals.cursor_manager:
 		player.player_visuals.cursor_manager.hide_target_point()
+
+
+#region --- Serialization helpers ---
+
+func _vec3_to_array(v: Vector3) -> Array:
+	return [v.x, v.y, v.z]
+
+func _array_to_vec3(arr: Array) -> Vector3:
+	if arr.size() >= 3:
+		return Vector3(arr[0], arr[1], arr[2])
+	return Vector3.ZERO
+
+func to_dict() -> Dictionary:
+	# Sync weight from InventoryManager before serializing
+	#if inventory_manager:
+		#_sync_weight_from_manager()
+	
+	return {
+		"global_position": _vec3_to_array(global_position),
+		"look_direction": _vec3_to_array(look_direction),
+		"level_name": level_name,
+		"level": level,
+		"skill_points": skill_points,
+		"experience": experience,
+		"max_experience": max_experience,
+		"health": health,
+		"max_health": max_health,
+		"hp_regeneration": hp_regeneration,
+		"current_weight": current_weight,  # Synced from InventoryManager
+		"max_weight": max_weight,
+		"player_mass": player_mass,
+		"inventory_size": inventory_size,
+		#"movement_mode": movement_mode,
+		"current_weapon_state": WeaponState.keys()[current_weapon_state],
+		"statuses": statuses if statuses != null else []
+		# Note: inventory and equipment are handled by InventoryManager and EquipmentManager
+	}
+
+func from_dict(data: Dictionary) -> void:
+	# Strict loading: assert every required key exists and is valid. No defaults, no branches.
+	#Utilities.print_formatted_dict("Loading Player Stats", data, "PlayerResources")
+
+	var gp = data["global_position"]
+	global_position = Vector3(gp[0], gp[1], gp[2])
+	var ld = data["look_direction"]
+	look_direction = Vector3(ld[0], ld[1], ld[2])
+
+	level_name = String(data["level_name"]) 
+	level = int(data["level"]) 
+	skill_points = int(data["skill_points"]) 
+	experience = int(data["experience"]) 
+	max_experience = int(data["max_experience"]) 
+	health = float(data["health"]) 
+	max_health = float(data["max_health"]) 
+	hp_regeneration = float(data["hp_regeneration"]) 
+	current_weight = float(data["current_weight"]) 
+	max_weight = float(data["max_weight"]) 
+	player_mass = float(data["player_mass"]) 
+	inventory_size = int(data["inventory_size"]) 
+	#movement_mode = String(data["movement_mode"]) 
+
+	var state_name: String = String(data["current_weapon_state"])
+	var idx: int = WeaponState.keys().find(state_name)
+	if idx >= 0:
+		current_weapon_state = idx as WeaponState
+	else:
+		current_weapon_state = WeaponState.HOLSTERED  # Default fallback
+
+	var incoming_statuses = data["statuses"]
+	var statuses_typed: Array[String] = []
+	for s in incoming_statuses:
+		statuses_typed.append(String(s))
+	statuses = statuses_typed
+#endregion

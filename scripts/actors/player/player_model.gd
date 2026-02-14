@@ -1,8 +1,6 @@
 extends Node
 class_name PlayerModel
 
-
-
 #@export var interaction_manager: InteractionManager
 @export var stats_manager: StatsManager
 @onready var combat = $Combat as HumanoidCombat
@@ -37,7 +35,7 @@ func _ready():
 	inventory_manager = player.inventory_manager
 	equipment_manager = player.equipment_manager
 	resources.model = self  # Set model reference for death triggering
-	#resources._init_stats(stats_manager, inventory_manager, equipment_manager)
+	resources._init_stats(stats_manager, inventory_manager, equipment_manager)
 	
 	if active_weapon:
 		active_weapon.holder = self

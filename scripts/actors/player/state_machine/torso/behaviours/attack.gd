@@ -12,6 +12,8 @@ func transition_logic(input: InputPackage) -> String:
 	return "okay"
 
 func on_enter_behaviour(input : InputPackage):
+	if GameManager.game_state == GameManager.GameState.COMBAT:
+		player.player_model.resources.spend_action_points(get_action_cost())
 	switch_action_to("enter", input)
 
 func choose_action(input : InputPackage):
@@ -19,3 +21,7 @@ func choose_action(input : InputPackage):
 		switch_action_to("hit", input)
 	if current_action.action_name == "hit" and current_action.animation_ended():
 		switch_action_to("exit", input)
+
+func get_action_cost() -> int:
+	var stats := player.player_model.stats_manager as StatsManager
+	return stats.get_unarmed_action_cost()

@@ -18,7 +18,8 @@ collision_layer = 2
 collision_mask = 255
 script = ExtResource("1_8afob")
 
-[node name="PlayerModel" parent="." unique_id=1612628095 instance=ExtResource("2_gmlin")]
+[node name="PlayerModel" parent="." unique_id=1612628095 node_paths=PackedStringArray("stats_manager") instance=ExtResource("2_gmlin")]
+stats_manager = NodePath("../StatsManager")
 
 [node name="PlayerVisuals" parent="." unique_id=925292958 instance=ExtResource("3_lvxji")]
 

@@ -1,6 +1,8 @@
 extends Node
 class_name StatsManager
 
+enum CurrentUnarmedAction {PUNCH, KICK}
+
 @export var is_input_debug_turned_on: bool = false
 
 var model : PlayerModel
@@ -8,6 +10,7 @@ var stats = {}
 var base_file_path : NodePath = "res://data/player/stats.json"
 var inventory_manager: InventoryManager
 var equipment_manager: EquipmentManager
+var current_unarmed_action: CurrentUnarmedAction = CurrentUnarmedAction.PUNCH
 
 #region Constants
 const FATIGUE_TRESHOLD = 20
@@ -99,6 +102,25 @@ func _load_equipment_from_stats() -> void:
 func _on_equipment_changed() -> void:
 	# Auto-save equipment to stats whenever equipment changes
 	save_equipment_to_stats()
+
+func get_unarmed_action_key() -> String:
+	match current_unarmed_action:
+		CurrentUnarmedAction.PUNCH:
+			return "punch"
+		CurrentUnarmedAction.KICK:
+			return "kick"
+	return "punch"
+	
+func get_unarmed_action_cost() -> int:
+	match current_unarmed_action:
+		CurrentUnarmedAction.PUNCH:
+			return 3
+		CurrentUnarmedAction.KICK:
+			return 4
+	return 1
+
+func set_unarmed_action(action: CurrentUnarmedAction) -> void:
+	current_unarmed_action = action
 
 func save_stats_to_file() -> void:
 	if not stats:

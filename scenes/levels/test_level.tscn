@@ -37,8 +37,7 @@ size = Vector3(0.3, 0.3, 0.3)
 size = Vector3(0.4, 2, 0.4)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_6xh4u"]
-radius = 0.35595703
-height = 1.559082
+radius = 0.6
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2mu0v"]
 albedo_color = Color(1, 1, 0, 1)
