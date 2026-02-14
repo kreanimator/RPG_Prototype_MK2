@@ -15,6 +15,8 @@ class_name PlayerModel
 @onready var skeleton_animator: AnimationPlayer = $SkeletonAnimator
 @onready var legs_anim_settings: AnimationPlayer = $LegsAnimationSettings
 
+@onready var active_weapon: Weapon
+
 var player: Player
 var inventory_manager: InventoryManager
 var equipment_manager: EquipmentManager
@@ -68,6 +70,7 @@ func update(input: InputPackage, delta: float) -> void:
 		current_behaviour._on_enter_behaviour(input)
 
 	current_behaviour._update(input, delta)
+
 
 func _init_resources() -> void:
 	if _resources_initialized:
