@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://1bnpi0rs50co" path="res://scripts/dummy_interactable.gd" id="7_7x1jh"]
 [ext_resource type="PackedScene" uid="uid://cq1gygqlwqh4w" path="res://scenes/interactable.tscn" id="8_hfwtw"]
 [ext_resource type="Script" uid="uid://c7owhibtq16h4" path="res://scripts/dependant_dummy.gd" id="9_hfwtw"]
+[ext_resource type="PackedScene" uid="uid://mqtuyu30cudi" path="res://assets/models/training_dummy.glb" id="9_jmx14"]
 [ext_resource type="Script" uid="uid://dad3cvrx4oma5" path="res://scripts/dependant_dummy2.gd" id="10_2mu0v"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_v45ci"]
@@ -35,9 +36,9 @@ size = Vector3(0.3, 0.3, 0.3)
 [sub_resource type="BoxMesh" id="BoxMesh_eaa0b"]
 size = Vector3(0.4, 2, 0.4)
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_48ne7"]
-
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_6xh4u"]
+radius = 0.35595703
+height = 1.559082
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2mu0v"]
 albedo_color = Color(1, 1, 0, 1)
@@ -273,21 +274,22 @@ size = Vector3(3, 0.5, 4)
 [node name="DummyEnemy" type="CharacterBody3D" parent="." unique_id=1654119973]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.414871, 1.2374926, 14.145405)
 collision_layer = 2
-collision_mask = 14
+collision_mask = 15
 script = ExtResource("4_48ne7")
 actor_name = "Fucking Mutant"
 
 [node name="FactionComponent" parent="DummyEnemy" unique_id=1729141699 instance=ExtResource("5_6xh4u")]
 faction = 3
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="DummyEnemy" unique_id=169079289]
-mesh = SubResource("CapsuleMesh_48ne7")
-
 [node name="CollisionShape3D" type="CollisionShape3D" parent="DummyEnemy" unique_id=1721867499]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15437138, 0)
 shape = SubResource("CapsuleShape3D_6xh4u")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="DummyEnemy" unique_id=1420669264]
 avoidance_enabled = true
+
+[node name="Sketchfab_Scene" parent="DummyEnemy" unique_id=1364958278 instance=ExtResource("9_jmx14")]
+transform = Transform3D(-0.09997036, 0, -0.0024345051, 0, 0.1, 0, 0.0024345051, 0, -0.09997036, 0, -0.8504467, 0)
 
 [node name="DummyInteractable" parent="." unique_id=2142339155 instance=ExtResource("6_6xh4u")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12782955, 0.3999981, 11.451701)

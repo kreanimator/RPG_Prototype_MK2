@@ -19,7 +19,7 @@ enum WeaponType{
 var min_damage : float = 0  # Loaded from item data
 var max_damage : float = 1  # Loaded from item data
 @export var weapon_type: WeaponType = WeaponType.UNARMED
-@export var range: float = 0.0  # 0 = melee, >0 = ranged weapon range in meters
+@export var weapon_range: float = 0.0  # 0 = melee, >0 = ranged weapon range in meters
 
 # Weapon socket placement (set in scene)
 @export_group("Socket Placement")
@@ -53,7 +53,7 @@ func initialize_from_item_data(item_base: Dictionary) -> void:
 		base_damage = min_damage
 	
 	# Load range (0 for melee, >0 for ranged)
-	range = float(weapon_data.get("range", 0.0))
+	weapon_range = float(weapon_data.get("range", 0.0))
 
 ## Calculate random damage between min_damage and max_damage (inclusive)
 func calculate_damage() -> float:

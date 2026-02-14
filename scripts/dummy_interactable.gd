@@ -19,8 +19,8 @@ func _ready() -> void:
 	if not interactable.interaction_triggered.is_connected(_on_interaction_triggered):
 		interactable.interaction_triggered.connect(_on_interaction_triggered)
 
-func _on_interaction_triggered(actor: Actor, action: String) -> void:
-	print("[DummyInteractable] action=", action, " by=", actor.name)
+func _on_interaction_triggered(actor: Actor, act: String) -> void:
+	print("[DummyInteractable] action=", act, " by=", actor.name)
 
 	if destroy_on_interact:
 		print("[DummyInteractable] queue_free()")

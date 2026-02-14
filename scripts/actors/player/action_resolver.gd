@@ -122,7 +122,7 @@ func _execute_investigate_intent() -> void:
 		current_intent.target_normal
 	)
 
-func update(delta: float) -> void:
+func update(_delta: float) -> void:
 	if not current_intent or execution_state == ExecutionState.IDLE:
 		return
 

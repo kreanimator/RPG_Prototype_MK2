@@ -1,12 +1,13 @@
 extends Actor
 class_name DummyEnemy
 
+var gravity: float
 
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
+	gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
+func _physics_process(delta: float) -> void:
+	if not is_on_floor():
+		velocity.y -= gravity * delta
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta: float) -> void:
-	pass
+	move_and_slide()

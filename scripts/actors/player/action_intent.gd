@@ -20,7 +20,7 @@ static func create_move_intent(pos: Vector3, normal: Vector3) -> ActionIntent:
 	intent.requires_facing = false
 	return intent
 
-static func create_interact_intent(interactable: Interactable, actor: Actor) -> ActionIntent:
+static func create_interact_intent(interactable: Interactable, _actor: Actor) -> ActionIntent:
 	var intent = ActionIntent.new()
 	intent.intent_type = IntentType.INTERACT
 	intent.target_object = interactable
@@ -30,13 +30,13 @@ static func create_interact_intent(interactable: Interactable, actor: Actor) -> 
 	intent.requires_facing = true
 	return intent
 
-static func create_attack_intent(enemy: Actor, weapon_range: float) -> ActionIntent:
+static func create_attack_intent(enemy: Actor, wp_range: float) -> ActionIntent:
 	var intent = ActionIntent.new()
 	intent.intent_type = IntentType.ATTACK
 	intent.target_object = enemy
 	intent.target_position = enemy.global_position
 	intent.action_name = "attack"
-	intent.weapon_range = weapon_range
+	intent.weapon_range = wp_range
 	intent.requires_facing = true
 	return intent
 

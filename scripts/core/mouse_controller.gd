@@ -124,8 +124,8 @@ func _handle_attack_click() -> void:
 	if enemy_actor == null:
 		return
 
-	var range := _get_current_attack_range()
-	var intent := ActionIntent.create_attack_intent(enemy_actor, range)
+	var rng := _get_current_attack_range()
+	var intent := ActionIntent.create_attack_intent(enemy_actor, rng)
 
 	var resolver := player.player_model.action_resolver as ActionResolver
 	if resolver:
