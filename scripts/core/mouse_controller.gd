@@ -3,13 +3,10 @@ class_name InputCollector
 
 @onready var player: Player = $".."
 
-# Collision masks (bitfields)
-# Interactable is on Layer 4 => mask bit = 1 << (4-1) = 8
-const MASK_INTERACTABLE := 1 << 3
-
-# Your "ground/world" mask - keep what you actually use.
-# In your current code you pass `1`, which means Layer 1 only.
-const MASK_GROUND := 1 << 0
+# Physics layers (bitfields)
+const MASK_INTERACTABLE := 1 << 3   # Layer 4
+const MASK_GROUND       := 1 << 0   # Layer 1
+const MASK_ACTOR        := 1 << 1   # Layer 2
 
 var _pending_right_click := false
 var _pending_left_click := false
@@ -18,37 +15,34 @@ var _pending_mouse_pos := Vector2.ZERO
 func collect_input() -> InputPackage:
 	var new_input := InputPackage.new()
 
-	# Right click: switch mouse mode
+	# Right click: cycle mouse mode
 	if _pending_right_click:
 		_pending_right_click = false
 		_cycle_mouse_mode()
 		player.player_visuals.cursor_manager.set_cursor_mode(GameManager.mouse_mode)
 
 	# Left click: act in current mode
-	if _pending_left_click and GameManager.can_perform_action:
+	if _pending_left_click:
 		_pending_left_click = false
 
-		match GameManager.mouse_mode:
-			GameManager.MouseMode.INTERACT:
-				_handle_interact_click(new_input)
+		if GameManager.can_perform_action:
+			match GameManager.mouse_mode:
+				GameManager.MouseMode.INTERACT:
+					_handle_interact_click()
+				GameManager.MouseMode.ATTACK:
+					_handle_attack_click()
+				_:
+					_handle_world_click(new_input)
 
-			_:
-				_handle_world_click(new_input)
-
-	# Clear pending click if action was blocked
-	elif _pending_left_click:
-		_pending_left_click = false
-
-	# Check if action resolver is executing an intent
-	var action_resolver = player.player_model.action_resolver as ActionResolver
+	# If action resolver is running an intent, it drives the action string
+	var action_resolver := player.player_model.action_resolver as ActionResolver
 	if action_resolver and action_resolver.is_executing():
-		var action = action_resolver.get_current_action_for_input()
+		var action := action_resolver.get_current_action_for_input()
 		if action != "":
 			new_input.actions.append(action)
-			# Don't add default idle when resolver is active
 			return new_input
 
-	# Default
+	# Default idle
 	if new_input.actions.is_empty():
 		if GameManager.move_mode == GameManager.MoveMode.CROUCH:
 			new_input.actions.append("crouch_idle")
@@ -57,8 +51,7 @@ func collect_input() -> InputPackage:
 	return new_input
 
 
-func _handle_interact_click(new_input: InputPackage) -> void:
-	# Raycast for Area3D interactables
+func _handle_interact_click() -> void:
 	var hit = Utils.get_camera_raycast_from_mouse(
 		_pending_mouse_pos,
 		player.camera_node.cam,
@@ -67,18 +60,20 @@ func _handle_interact_click(new_input: InputPackage) -> void:
 		MASK_INTERACTABLE
 	)
 
-	if hit and hit.has("collider") and hit["collider"] is Interactable:
-		var inter := hit["collider"] as Interactable
-		# Create interact intent instead of direct action
-		var intent = ActionIntent.create_interact_intent(inter, player)
-		var action_resolver = player.player_model.action_resolver as ActionResolver
-		if action_resolver:
-			action_resolver.set_intent(intent)
+	if not hit or not hit.has("collider"):
 		return
+
+	var col = hit["collider"]
+	if col is Interactable:
+		var inter := col as Interactable
+		var intent := ActionIntent.create_interact_intent(inter, player)
+
+		var resolver := player.player_model.action_resolver as ActionResolver
+		if resolver:
+			resolver.set_intent(intent)
 
 
 func _handle_world_click(new_input: InputPackage) -> void:
-	# Raycast world/ground using bodies
 	var result = Utils.get_camera_raycast_from_mouse(
 		_pending_mouse_pos,
 		player.camera_node.cam,
@@ -96,42 +91,76 @@ func _handle_world_click(new_input: InputPackage) -> void:
 
 	match GameManager.mouse_mode:
 		GameManager.MouseMode.MOVE:
-			# Create move intent
-			var intent = ActionIntent.create_move_intent(
-				result["position"],
-				result["normal"]
-			)
-			var action_resolver = player.player_model.action_resolver as ActionResolver
-			if action_resolver:
-				action_resolver.set_intent(intent)
-			
-			# Show target point
-			player.player_visuals.cursor_manager.show_target_point(
-				result["position"],
-				result["normal"]
-			)
+			var intent := ActionIntent.create_move_intent(result["position"], result["normal"])
+			var resolver := player.player_model.action_resolver as ActionResolver
+			if resolver:
+				resolver.set_intent(intent)
 
-		GameManager.MouseMode.ATTACK:
-			new_input.actions.append("attack")
+			player.player_visuals.cursor_manager.show_target_point(result["position"], result["normal"])
 
 		GameManager.MouseMode.INVESTIGATE:
-			new_input.actions.append("investigate")
+			# For now just to move to every object, will changed and refactored later it is not core functionality now
+			var intent := ActionIntent.create_investigate_intent(result["position"])
+			var resolver := player.player_model.action_resolver as ActionResolver
+			if resolver:
+				resolver.set_intent(intent)
 
 
-func _input(event: InputEvent) -> void:
+func _handle_attack_click() -> void:
+	# Allow both bodies and areas (hurtboxes etc.)
+	var hit = Utils.get_camera_raycast_from_mouse(
+		_pending_mouse_pos,
+		player.camera_node.cam,
+		true,   # collide_with_bodies
+		true,   # collide_with_areas
+		MASK_ACTOR
+	)
+
+	if not hit or not hit.has("collider"):
+		return
+
+	var collider: Node = hit["collider"]
+	var enemy_actor := _find_actor_from_node(collider)
+	if enemy_actor == null:
+		return
+
+	var range := _get_current_attack_range()
+	var intent := ActionIntent.create_attack_intent(enemy_actor, range)
+
+	var resolver := player.player_model.action_resolver as ActionResolver
+	if resolver:
+		resolver.set_intent(intent)
+
+
+func _find_actor_from_node(n: Node) -> Actor:
+	# Raycasts often hit a child (CollisionShape3D / Area3D / etc.), so walk parents.
+	var cur: Node = n
+	while cur:
+		if cur is Actor:
+			return cur as Actor
+		cur = cur.get_parent()
+	return null
+
+
+func _unhandled_input(event: InputEvent) -> void:
 	if Utils.is_mouse_over_gui():
 		return
 
-	# Right click: cycle mode
-	if event is InputEventMouseButton and event.is_action_pressed("right_click"):
-		_pending_right_click = true
+	if event is InputEventMouseButton and event.pressed:
+		var mb := event as InputEventMouseButton
 
-	# Left click: act in current mode
-	if event is InputEventMouseButton and event.is_action_pressed("left_click"):
-		_pending_left_click = true
-		_pending_mouse_pos = event.position
+		if mb.button_index == MOUSE_BUTTON_RIGHT:
+			_pending_right_click = true
+
+		elif mb.button_index == MOUSE_BUTTON_LEFT:
+			_pending_left_click = true
+			_pending_mouse_pos = mb.position
+
+
+func _get_current_attack_range() -> float:
+	# TODO: later return equipped weapon range if exists
+	return 1.6
 
 
 func _cycle_mouse_mode() -> void:
 	GameManager.mouse_mode = (int(GameManager.mouse_mode) + 1) % GameManager.MouseMode.keys().size() as GameManager.MouseMode
-	print("mouse_mode:", GameManager.MouseMode.keys()[GameManager.mouse_mode])

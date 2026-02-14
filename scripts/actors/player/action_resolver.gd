@@ -25,7 +25,7 @@ func _ready() -> void:
 func set_intent(intent: ActionIntent) -> void:
 	if current_intent:
 		_cancel_current_intent()
-	
+
 	current_intent = intent
 	execution_state = ExecutionState.IDLE
 	_action_triggered = false
@@ -35,16 +35,16 @@ func set_intent(intent: ActionIntent) -> void:
 func _start_intent_execution() -> void:
 	if not current_intent:
 		return
-	
+
 	match current_intent.intent_type:
 		ActionIntent.IntentType.MOVE:
 			_execute_move_intent()
 		ActionIntent.IntentType.INTERACT:
-			_execute_interact_intent()
+			_execute_interact_intent() # KEEP AS-IS
 		ActionIntent.IntentType.ATTACK:
-			_execute_attack_intent()
+			_execute_attack_intent()   # FIXED
 		ActionIntent.IntentType.INVESTIGATE:
-			_execute_investigate_intent()
+			_execute_investigate_intent() # simple "Fallout2 style" move
 
 func _execute_move_intent() -> void:
 	execution_state = ExecutionState.NAVIGATING
@@ -54,61 +54,78 @@ func _execute_move_intent() -> void:
 		current_intent.target_normal
 	)
 
+# -------------------------
+# INTERACT (unchanged)
+# -------------------------
 func _execute_interact_intent() -> void:
 	var interactable = current_intent.target_object as Interactable
-	
+
 	if not interactable or not is_instance_valid(interactable):
 		intent_failed.emit(current_intent, "Invalid interactable")
 		_clear_intent()
 		return
-	
+
 	# Store the target interactable on the player
 	player.current_interactable = interactable
-	
+
 	# Check distance to interactable
 	var distance = player.global_position.distance_to(interactable.global_position)
 	if distance <= interactable.interaction_zone_size:
 		# Already in range, go directly to executing
 		execution_state = ExecutionState.EXECUTING_ACTION
 		return
-	
+
 	# Need to navigate closer
 	execution_state = ExecutionState.NAVIGATING
 	player.set_target_position(current_intent.target_position)
 
+# -------------------------
+# ATTACK (fixed: move into range, then attack; never "out of range" fail)
+# -------------------------
 func _execute_attack_intent() -> void:
-	var enemy = current_intent.target_object as Actor
-	
+	var enemy := current_intent.target_object as Actor
+
 	if not enemy or not is_instance_valid(enemy):
 		intent_failed.emit(current_intent, "Invalid enemy target")
 		_clear_intent()
 		return
-	
-	var distance = player.global_position.distance_to(enemy.global_position)
-	
-	if current_intent.weapon_range > 0:
-		if distance > current_intent.weapon_range:
-			intent_failed.emit(current_intent, "Enemy out of range")
-			_clear_intent()
-			return
-		else:
-			execution_state = ExecutionState.EXECUTING_ACTION
-			return
-	else:
-		if distance > 2.0:
-			execution_state = ExecutionState.NAVIGATING
-			player.set_target_position(enemy.global_position)
-		else:
-			execution_state = ExecutionState.EXECUTING_ACTION
 
+	# Cache enemy position into intent (so navigation has something even if enemy ref changes)
+	current_intent.target_position = enemy.global_position
+
+	# Decide desired melee/ranged approach distance
+	# - if weapon_range provided: use it (melee should pass 1.6 etc)
+	# - else fallback to 2.0 (your old default)
+	var desired_range := current_intent.weapon_range
+	if desired_range <= 0.0:
+		desired_range = 2.0
+
+	var distance := player.global_position.distance_to(enemy.global_position)
+
+	if distance <= desired_range:
+		# Already in range -> execute attack
+		execution_state = ExecutionState.EXECUTING_ACTION
+		return
+
+	# Out of range -> navigate closer (same "move then act" style as interact)
+	execution_state = ExecutionState.NAVIGATING
+	player.set_target_position(enemy.global_position)
+
+# -------------------------
+# INVESTIGATE (simple: move to clicked position; like Fallout 2 "research")
+# -------------------------
 func _execute_investigate_intent() -> void:
 	execution_state = ExecutionState.NAVIGATING
 	player.set_target_position(current_intent.target_position)
+	player.player_visuals.cursor_manager.show_target_point(
+		current_intent.target_position,
+		current_intent.target_normal
+	)
 
 func update(delta: float) -> void:
 	if not current_intent or execution_state == ExecutionState.IDLE:
 		return
-	
+
 	match execution_state:
 		ExecutionState.NAVIGATING:
 			_update_navigation()
@@ -116,18 +133,38 @@ func update(delta: float) -> void:
 			_monitor_behavior_completion()
 
 func _update_navigation() -> void:
-	# For interact intents, check if we're close enough
+	# Keep the EXACT interact logic (unchanged)
 	if current_intent.intent_type == ActionIntent.IntentType.INTERACT:
 		var interactable = current_intent.target_object as Interactable
 		if interactable and is_instance_valid(interactable):
 			var distance = player.global_position.distance_to(interactable.global_position)
 			if distance <= interactable.interaction_zone_size:
-				# Close enough, transition to executing action
-				# The interact behavior will handle rotation
 				execution_state = ExecutionState.EXECUTING_ACTION
 				return
-	
-	# For other intents, wait for navigation to finish
+
+	# For ATTACK: move into weapon_range, not just "navigation finished"
+	elif current_intent.intent_type == ActionIntent.IntentType.ATTACK:
+		var enemy := current_intent.target_object as Actor
+		if not enemy or not is_instance_valid(enemy):
+			intent_failed.emit(current_intent, "Enemy disappeared")
+			_clear_intent()
+			return
+
+		var desired_range := current_intent.weapon_range
+		if desired_range <= 0.0:
+			desired_range = 2.0
+
+		var distance := player.global_position.distance_to(enemy.global_position)
+		if distance <= desired_range:
+			# Close enough to attack
+			execution_state = ExecutionState.EXECUTING_ACTION
+			return
+
+		# Enemy moved? keep chasing
+		player.set_target_position(enemy.global_position)
+		return
+
+	# For MOVE / INVESTIGATE: wait for navigation finished
 	if player.nav_agent.is_navigation_finished():
 		execution_state = ExecutionState.EXECUTING_ACTION
 
@@ -138,6 +175,10 @@ func _monitor_behavior_completion() -> void:
 			_last_behavior = "interact"
 		elif current_intent.intent_type == ActionIntent.IntentType.ATTACK:
 			_last_behavior = "attack"
+		elif current_intent.intent_type == ActionIntent.IntentType.INVESTIGATE:
+			_last_behavior = "investigate"
+		else:
+			_last_behavior = current_intent.action_name
 	else:
 		# Check if behavior has completed
 		var current_behavior = player.player_model.torso_machine.current_behaviour.behaviour_name
@@ -165,7 +206,7 @@ func is_executing() -> bool:
 func get_current_action_for_input() -> String:
 	if not current_intent:
 		return ""
-	
+
 	match execution_state:
 		ExecutionState.NAVIGATING:
 			match GameManager.move_mode:
@@ -180,8 +221,12 @@ func get_current_action_for_input() -> String:
 				return "interact"
 			elif current_intent.intent_type == ActionIntent.IntentType.ATTACK:
 				return "attack"
+			elif current_intent.intent_type == ActionIntent.IntentType.INVESTIGATE:
+				# If you have a special investigate anim, return it.
+				# Otherwise, we can just idle after reaching point.
+				return "idle"
 			return current_intent.action_name
-	
+
 	return ""
 
 func cancel_intent() -> void:
