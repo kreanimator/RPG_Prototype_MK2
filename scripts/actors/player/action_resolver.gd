@@ -216,18 +216,27 @@ func get_current_action_for_input() -> String:
 					return "run"
 				GameManager.MoveMode.CROUCH:
 					return "crouch"
+
 		ExecutionState.EXECUTING_ACTION:
-			if current_intent.intent_type == ActionIntent.IntentType.INTERACT:
-				return "interact"
-			elif current_intent.intent_type == ActionIntent.IntentType.ATTACK:
-				return "attack"
-			elif current_intent.intent_type == ActionIntent.IntentType.INVESTIGATE:
-				# If you have a special investigate anim, return it.
-				# Otherwise, we can just idle after reaching point.
-				return "idle"
-			return current_intent.action_name
+			# IMPORTANT:
+			# Only emit the action ONCE to enter the behaviour.
+			# After that, return "" so InputCollector falls back to idle
+			# while we keep monitoring behaviour completion.
+			if _action_triggered:
+				return ""
+
+			match current_intent.intent_type:
+				ActionIntent.IntentType.INTERACT:
+					return "interact"
+				ActionIntent.IntentType.ATTACK:
+					return "attack"
+				ActionIntent.IntentType.INVESTIGATE:
+					return ""
+				_:
+					return current_intent.action_name
 
 	return ""
+
 
 func cancel_intent() -> void:
 	_cancel_current_intent()

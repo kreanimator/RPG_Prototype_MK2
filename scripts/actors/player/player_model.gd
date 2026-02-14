@@ -90,7 +90,7 @@ func update(input : InputPackage, delta : float):
 	#prints(input.actions, input.aim_actions, input.combat_actions)
 	var transition_verdict = current_behaviour.check_relevance(input)
 	if transition_verdict != "okay":
-		print(current_behaviour.behaviour_name + " -> " + transition_verdict)
+		#print(current_behaviour.behaviour_name + " -> " + transition_verdict)
 		current_behaviour._on_exit_behaviour()
 		current_behaviour = torso_machine.get_behaviour_by_name(transition_verdict)
 		torso_machine.current_behaviour = current_behaviour
