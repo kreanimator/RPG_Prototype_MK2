@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://bksrxhfdvt02a"]
+
+[ext_resource type="Script" uid="uid://ns3w76hx155w" path="res://scripts/actors/enemy.gd" id="1_fah2s"]
+[ext_resource type="PackedScene" uid="uid://bukpe1wm5nsne" path="res://scenes/faction_component.tscn" id="2_fx3pk"]
+[ext_resource type="PackedScene" uid="uid://mqtuyu30cudi" path="res://assets/models/training_dummy.glb" id="3_kos4r"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_6xh4u"]
+radius = 0.4194336
+height = 1.4672852
+
+[node name="DummyEnemy" type="CharacterBody3D" unique_id=1554000348]
+collision_layer = 2
+collision_mask = 15
+script = ExtResource("1_fah2s")
+actor_name = "Fucking Mutant"
+
+[node name="FactionComponent" parent="." unique_id=1729141699 instance=ExtResource("2_fx3pk")]
+faction = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=103787613]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.13185382, 0)
+shape = SubResource("CapsuleShape3D_6xh4u")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=313376946]
+avoidance_enabled = true
+
+[node name="Sketchfab_Scene" parent="." unique_id=1364958278 instance=ExtResource("3_kos4r")]
+transform = Transform3D(-0.09997036, 0, -0.0024345051, 0, 0.1, 0, 0.0024345051, 0, -0.09997036, 0, -0.8504467, 0)

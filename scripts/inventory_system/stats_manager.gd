@@ -66,6 +66,49 @@ func set_equipment_manager(em: EquipmentManager) -> void:
 	if equipment_manager:
 		equipment_manager.equipment_changed.connect(_on_equipment_changed)
 
+# -------------------------
+# Derived stats (Fallout-like)
+# -------------------------
+
+func get_level() -> int:
+	return int(get_stats().get("level", 1))
+
+func get_endurance() -> int:
+	return int(get_stats().get("endurance", 1))
+
+func get_strength() -> int:
+	return int(get_stats().get("strength", 1))
+
+func get_max_health() -> float:
+	# Example formula (tweak to your balance):
+	# Fallout-ish idea: base + END * X + level * Y
+	var lvl := get_level()
+	var endu := get_endurance()
+	return float(20 + endu * 5 + lvl * 2)
+
+func get_max_weight() -> float:
+	# Example formula:
+	# base + STR * X
+	var str := get_strength()
+	return float(50 + str * 8)
+
+func get_current_weight_runtime() -> float:
+	# Always compute from inventory
+	if inventory_manager:
+		return float(inventory_manager.get_total_weight())
+	return float(get_stats().get("current_weight", 0.0)) # fallback only
+
+func get_max_action_points() -> int:
+	var s := get_stats()
+	var agl := int(s["agility"])
+	# Simple Fallout-ish baseline. Tune later.
+	# Example: 6 base + AGL*2 (AGL=3 -> 12 AP)
+	return 6 + agl * 2
+
+func get_ap_restore_on_enter_combat() -> bool:
+	# placeholder if later you want different rules
+	return true
+
 #region ----- Inventory Persistence -----
 func _load_inventory_from_stats() -> void:
 	if not inventory_manager or not stats:
@@ -79,10 +122,8 @@ func _load_inventory_from_stats() -> void:
 func save_inventory_to_stats() -> void:
 	if not inventory_manager or not stats:
 		return
-	
 	stats["inventory"] = inventory_manager.to_dict()
-	# Also update current_weight to match inventory weight
-	stats["current_weight"] = inventory_manager.get_total_weight()
+
 
 func save_equipment_to_stats() -> void:
 	if not equipment_manager or not stats:

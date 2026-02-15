@@ -6,22 +6,9 @@
   "level": 1,
   "skill_points": 0,
   "experience": 0,
-  "max_experience": 100,
+  "max_experience": 1000,
 
-  "health": 100.0,
-  "max_health": 100.0,
-  "stamina": 100.0,
-  "max_stamina": 100.0,
-  "stamina_regeneration_rate": 3.0,
-  "hp_regeneration": 0.5,
-
-  "current_weight": 16.8,
-  "max_weight": 70.0,
-  "player_mass": 50.0,
-  "inventory_size": 20,
-
-  "movement_mode": "run",
-  "current_weapon_state": "HOLSTERED",
+  "hp_current": 25.0,
 
   "strength": 3,
   "agility": 3,
@@ -30,91 +17,10 @@
   "intelligence": 3,
   "luck": 3,
   "charisma": 3,
-  
 
   "statuses": [],
-  "inventory": [
-	{
-	  "iid": "a1b2c3d4-e5f6-4789-a012-b3c4d5e6f789",
-	  "catalog_id": "magnum",
-	  "qty": 1,
-	  "ammo": 3
-	},
-	{
-	  "iid": "m1a2c3h4-e5t6-4789-e012-b3c4d5e6f789",
-	  "catalog_id": "machete",
-	  "qty": 1
-	},
-	{
-	  "iid": "s1m2g3h4-e5t6-4789-e012-b3c4d5e6f789",
-	  "catalog_id": "smg",
-	  "qty": 1,
-	  "ammo": 30
-	},
-	{
-	  "iid": "c3d4e5f6-a7b8-4901-c234-d5e6f7a8b901",
-	  "catalog_id": "iron_ore",
-	  "qty": 15
-	},
-	{
-	  "iid": "d4e5f6a7-b8c9-4012-d345-e6f7a8b9c012",
-	  "catalog_id": "wood",
-	  "qty": 10
-	},
-	{
-	  "iid": "e5f6a7b8-c9d0-4123-e456-f7a8b9c0d123",
-	  "catalog_id": "frag_grenade",
-	  "qty": 2
-	},
-	{
-	  "iid": "f6a7b8c9-d0e1-4234-f567-a8b9c0d1e234",
-	  "catalog_id": "combat_helmet",
-	  "qty": 1
-	},
-	{
-	  "iid": "a7b8c9d0-e1f2-4345-a678-b9c0d1e2f345",
-	  "catalog_id": "combat_trousers",
-	  "qty": 1
-	},
-	{
-	  "iid": "b8c9d0e1-f2a3-4456-b789-c0d1e2f3a456",
-	  "catalog_id": "combat_boots",
-	  "qty": 1
-	},
-	{
-	  "iid": "a1b2c3d4-e5f6-4789-a012-357magnumammo",
-	  "catalog_id": "357_MAGNUM",
-	  "qty": 50
-	},
-	{
-	  "iid": "b2c3d4e5-f6a7-4890-b123-9mmammo12345",
-	  "catalog_id": "9MM",
-	  "qty": 100
-	},
-	{
-	  "iid": "d1a2n3d4-y5h6-7890-a123-b4c5d6e7f890",
-	  "catalog_id": "dandy_hat_of_power",
-	  "qty": 1
-	},
-	{
-	  "iid": "g1l2o3c4-k5h6-7890-a123-b4c5d6e7f890",
-	  "catalog_id": "glock19",
-	  "qty": 1,
-	  "ammo": 15
-	},
-	{
-	  "iid": "m1e2d3k4-i5t6-7890-a123-b4c5d6e7f890",
-	  "catalog_id": "medkit",
-	  "qty": 5
-	},
-	{
-	  "iid": "e1n2e3r4-g5y6-7890-d1r2-i3n4k5e6f7g8h9",
-	  "catalog_id": "energy_drink",
-	  "qty": 5
-	}
-  ],
-  "equipment": {
-  },
+  "inventory": [],
+  "equipment": {},
   "skills": [],
   "quests": []
 }
