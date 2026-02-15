@@ -20,6 +20,11 @@ Utils="*uid://blr8r4ugmapp0"
 File="*uid://di64ylho3pulu"
 GameManager="*uid://bjuv8fo6xntu7"
 
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+
 [global_group]
 
 player=""

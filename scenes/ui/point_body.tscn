@@ -1,40 +1,74 @@
 [gd_scene format=3 uid="uid://c83iqwhaadj3n"]
 
 [ext_resource type="Script" uid="uid://b8pt77v13le5i" path="res://scripts/ui/point_body.gd" id="1_xm3mk"]
+[ext_resource type="Texture2D" uid="uid://cgkkof5hhyyva" path="res://assets/textures/circle-xxl.png" id="2_d0us6"]
 
-[node name="PointBody" type="ColorRect" unique_id=1196578684]
-custom_minimum_size = Vector2(20, 20)
-color = Color(0.2784314, 0, 0.22745098, 1)
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_k3xbk"]
+load_path = "res://.godot/imported/circle-xxl.png-4881de04839cc5ecb495ba9853474a6c.ctex"
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_55cpg"]
+load_path = "res://.godot/imported/circle-xxl.png-4881de04839cc5ecb495ba9853474a6c.ctex"
+
+[node name="PointBody" type="TextureRect" unique_id=599852375]
+self_modulate = Color(0, 0, 0, 1)
+custom_minimum_size = Vector2(15, 15)
+offset_right = 15.0
+offset_bottom = 15.0
+texture = SubResource("CompressedTexture2D_k3xbk")
+expand_mode = 2
 script = ExtResource("1_xm3mk")
 
-[node name="Filled" type="ColorRect" parent="." unique_id=1174598189]
-custom_minimum_size = Vector2(18, 18)
+[node name="Filled" type="TextureRect" parent="." unique_id=181993496]
+self_modulate = Color(3.0322374e-06, 0.7642849, 0.16249296, 1)
+custom_minimum_size = Vector2(13, 13)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -9.0
-offset_top = -9.0
-offset_right = 9.0
-offset_bottom = 9.0
+offset_left = -6.5
+offset_top = -6.5
+offset_right = 6.5
+offset_bottom = 6.5
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.22745098, 1, 0.1254902, 1)
+texture = SubResource("CompressedTexture2D_55cpg")
+expand_mode = 2
 
-[node name="Spent" type="ColorRect" parent="." unique_id=1261462260]
-custom_minimum_size = Vector2(18, 18)
+[node name="Spent" type="TextureRect" parent="." unique_id=1047280909]
+self_modulate = Color(0.15127608, 0.15127608, 0.15127608, 1)
+custom_minimum_size = Vector2(13, 13)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -9.0
-offset_top = -9.0
-offset_right = 9.0
-offset_bottom = 9.0
+offset_left = -6.5
+offset_top = -6.5
+offset_right = 6.5
+offset_bottom = 6.5
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.964912, 0.76201075, 0.9095506, 1)
+texture = ExtResource("2_d0us6")
+expand_mode = 2
+
+[node name="EnemyTurn" type="TextureRect" parent="." unique_id=37052894]
+visible = false
+self_modulate = Color(1, 0.21568628, 0, 1)
+custom_minimum_size = Vector2(13, 13)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -6.5
+offset_top = -6.5
+offset_right = 6.5
+offset_bottom = 6.5
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_d0us6")
+expand_mode = 2
