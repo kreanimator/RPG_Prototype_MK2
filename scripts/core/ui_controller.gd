@@ -303,8 +303,13 @@ func _update_health_ui() -> void:
 
 
 func _update_armor_ui() -> void:
-	if armor_label:
+	if armor_label == null:
+		return
+	if resources == null:
 		armor_label.text = "Armor: --"
+		return
+
+	armor_label.text = "Armor: %d" % resources.armor
 
 
 # Hotbar placeholders

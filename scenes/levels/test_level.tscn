@@ -49,11 +49,11 @@ material = SubResource("StandardMaterial3D_2mu0v")
 environment = SubResource("Environment_6xh4u")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1552053006]
-transform = Transform3D(0.63321817, 0.52875394, -0.5652027, -0.4913687, 0.83885604, 0.23426029, 0.59798986, 0.12938526, 0.7909916, -4.8346434, 18.25314, 0)
+transform = Transform3D(0.28295842, 0.8892603, -0.35937592, -0.74989516, 0.4387208, 0.4951575, 0.5979898, 0.12938516, 0.79099166, -4.8346434, 18.25314, 0)
 light_color = Color(1, 1, 0.5568628, 1)
-light_energy = 2.0
 shadow_enabled = true
-shadow_bias = 0.015
+directional_shadow_split_2 = 0.3
+directional_shadow_blend_splits = true
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=1966491]
 navigation_mesh = SubResource("NavigationMesh_yautc")

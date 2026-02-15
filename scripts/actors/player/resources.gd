@@ -17,24 +17,24 @@ signal action_points_changed(ap: int, max_ap: int)
 
 @export var god_mode: bool = false
 
-@export var global_position: Vector3
-@export var look_direction: Vector3
-@export var level_name: String
+var global_position: Vector3
+var look_direction: Vector3
+var level_name: String
 
-@export var level: int
-@export var skill_points: int
-@export var experience: int
-@export var max_experience: int
+var level: int
+var skill_points: int
+var experience: int
+var max_experience: int
 
 # Current values (max values are derived)
-@export var health: float
-@export var hp_regeneration: float
+var health: float
+var hp_regeneration: float
 
-@export var player_mass: float
-@export var inventory_size: int
+var player_mass: float
+var inventory_size: int
 
-@export var action_points: int
-@export var max_action_points: int
+var action_points: int
+var max_action_points: int
 
 var statuses: Array[String] = []
 
@@ -42,10 +42,10 @@ var statuses: Array[String] = []
 # Derived values (runtime)
 # -------------------------
 
-@export var max_health: float
-@export var current_weight: float
-@export var max_weight: float
-
+var max_health: float
+var current_weight: float
+var max_weight: float
+var armor: int
 # -------------------------
 # Runtime references
 # -------------------------
@@ -95,7 +95,8 @@ func recompute_derived_stats() -> void:
 	# Derived current weight
 	if inventory_manager:
 		current_weight = inventory_manager.get_total_weight()
-
+		
+	armor = stats_manager.get_armor_value()
 	# Clamp current values to caps
 	health = clamp(health, 0.0, max_health)
 	action_points = clamp(action_points, 0, max_action_points)

@@ -30,6 +30,10 @@ var catalog_loaded: bool = false
 func _ready() -> void:
 	_load_items_catalog()
 
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		get_tree().quit()
+
 #region ----- Catalog Loading -----
 func _load_items_catalog() -> void:
 	var items_data: Dictionary = File.load_json_file(items_catalog_path)

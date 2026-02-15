@@ -12,12 +12,11 @@ var inventory_manager: InventoryManager
 var equipment_manager: EquipmentManager
 var current_unarmed_action: CurrentUnarmedAction = CurrentUnarmedAction.PUNCH
 
-#region Constants
-const FATIGUE_TRESHOLD = 20
-const WALK_SPEED : float = 3.5
-const RUN_SPEED: float = 5.0
-const SPRINT_SPEED: float = 7.0
-#endregion
+# --- Derived stat formulas (tweak freely) ---
+const ARMOR_BASE_FLAT: int = 2          # naked baseline
+const ARMOR_PER_END: float = 1.0
+const ARMOR_PER_AGL: float = 0.5
+
 
 func _load_stats() -> Dictionary:
 	var stats_data: Dictionary = File.load_json_file(base_file_path)
@@ -109,6 +108,45 @@ func get_ap_restore_on_enter_combat() -> bool:
 	# placeholder if later you want different rules
 	return true
 
+func get_armor_value() -> int:
+	var s := get_stats()
+
+	# Base armor from stats
+	var endu := int(s.get("endurance", 0))
+	var agl := int(s.get("agility", 0))
+
+	var base_armor := ARMOR_BASE_FLAT \
+		+ int(round(endu * ARMOR_PER_END)) \
+		+ int(round(agl * ARMOR_PER_AGL))
+
+	# Gear armor (damage resistance)
+	var gear_armor := _get_equipped_armor_dr()
+
+	return max(0, base_armor + gear_armor)
+
+
+func _get_equipped_armor_dr() -> int:
+	if equipment_manager == null:
+		return 0
+
+	var items_db: Dictionary = GameManager.get_items_catalog()
+	var total := 0
+	var armor_slots := ["HEAD", "CHEST", "LEGS", "HANDS", "FEET"]
+
+	for slot in armor_slots:
+		var item: ItemInstance = equipment_manager.get_equipped_item(slot)
+		if item == null:
+			continue
+
+		var base: Dictionary = items_db.get(item.catalog_id, {})
+		if base.is_empty():
+			continue
+
+		var armor_data: Dictionary = base.get("armor", {})
+		total += int(armor_data.get("dr", 0))
+
+	return total
+
 #region ----- Inventory Persistence -----
 func _load_inventory_from_stats() -> void:
 	if not inventory_manager or not stats:
@@ -143,6 +181,8 @@ func _load_equipment_from_stats() -> void:
 func _on_equipment_changed() -> void:
 	# Auto-save equipment to stats whenever equipment changes
 	save_equipment_to_stats()
+	if model and model.resources:
+		model.resources.recompute_derived_stats()
 
 func get_unarmed_action_key() -> String:
 	match current_unarmed_action:
