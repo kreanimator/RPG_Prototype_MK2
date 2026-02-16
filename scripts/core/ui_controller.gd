@@ -29,6 +29,9 @@ class_name UIController
 @onready var hotbar_two: Button = %HotbarTwo
 @onready var hotbar_three: Button = %HotbarThree
 
+var player: Player
+var is_player_turn: bool = true
+
 const POINT_BODY := preload("uid://c83iqwhaadj3n")
 var selected_color: Color = Color("#ffff87")
 
@@ -49,7 +52,7 @@ func _ready() -> void:
 
 	if GameManager.has_signal("game_state_changed"):
 		GameManager.game_state_changed.connect(_on_game_state_changed)
-	turn_controller = get_tree().get_first_node_in_group("turn_controller")
+
 
 func set_player_resources(res: PlayerResources) -> void:
 	_disconnect_resources()
@@ -57,9 +60,10 @@ func set_player_resources(res: PlayerResources) -> void:
 	resources = res
 	if resources == null:
 		return
-
+	player = resources.model.player as Player
 	resources.action_points_changed.connect(_on_action_points_changed)
-
+	turn_controller = get_tree().get_first_node_in_group("turn_controller")
+	turn_controller.active_actor_changed.connect(_on_active_actor_changed)
 	update_ap_ui()
 	_update_health_ui()
 	_update_armor_ui()
@@ -139,8 +143,15 @@ func _on_turn_button_pressed() -> void:
 		print("[UI] End Turn pressed but no TurnController found in group")
 		return
 
-	print("[UI] End Turn pressed -> end_current_actor_turn() current=", turn_controller.current_actor)
-	turn_controller.end_current_actor_turn()
+	# ✅ Only end turn if PLAYER is the active actor
+	if player.is_player_turn:
+		print("[UI] End Turn pressed -> end_current_actor_turn() current=", turn_controller.current_actor)
+		turn_controller.end_current_actor_turn()
+	else:
+		print("[UI] End Turn ignored (not player turn). current=", turn_controller.current_actor)
+		return
+
+
 
 
 func _on_combat_button_pressed() -> void:
@@ -149,17 +160,12 @@ func _on_combat_button_pressed() -> void:
 	update_ap_ui()
 	_update_weapon_buttons_ui()
 
-	# Start/stop turn system
-	if turn_controller == null or not is_instance_valid(turn_controller):
-		turn_controller = get_tree().get_first_node_in_group("turn_controller")
-
-	if turn_controller:
-		if GameManager.game_state == GameManager.GameState.COMBAT:
-			print("[UI] Combat ON -> start_combat()")
-			turn_controller.start_combat()
-		else:
-			print("[UI] Combat OFF -> end_combat()")
-			turn_controller.end_combat()
+	if GameManager.game_state == GameManager.GameState.COMBAT:
+		print("[UI] Combat ON -> start_combat()")
+		turn_controller.start_combat()
+	else:
+		print("[UI] Combat OFF -> end_combat()")
+		turn_controller.end_combat()
 
 func _on_skills_button_pressed() -> void:
 	# TODO: open skills UI
@@ -284,16 +290,27 @@ func update_ap_ui() -> void:
 	for child in ap_container.get_children():
 		child.queue_free()
 
+	# Only show enemy overlay in COMBAT and only when it's NOT the player's slot
+	var show_enemy_turn := (GameManager.game_state == GameManager.GameState.COMBAT and not is_player_turn)
+
 	for i in range(max_ap):
-		var point := POINT_BODY.instantiate()
+		var point: PointBody = POINT_BODY.instantiate()
 		ap_container.add_child(point)
+
+		# Enemy turn: all points show enemy indicator
+		if show_enemy_turn:
+			point.set_enemy_turn(true)
+			continue
+
+		# Player turn / non-combat: normal AP display
+		point.set_enemy_turn(false)
 
 		var filled := false
 		if GameManager.game_state == GameManager.GameState.COMBAT:
 			filled = i < ap
 
-		if point.has_method("set_filled"):
-			point.call("set_filled", filled)
+		point.set_filled(filled)
+
 
 
 func _update_weapon_buttons_ui() -> void:
@@ -335,6 +352,10 @@ func _update_armor_ui() -> void:
 
 	armor_label.text = "Armor: %d" % resources.armor
 
+func _on_active_actor_changed(actor: Actor) -> void:
+	# Enemy turn if active actor is not the player
+	is_player_turn = (actor == player)
+	update_ap_ui()
 
 # Hotbar placeholders
 func _on_hotbar_one_pressed() -> void:

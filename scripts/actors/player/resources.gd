@@ -116,8 +116,6 @@ func _on_game_state_changed(new_state: int, _reason: String) -> void:
 
 	if new_state == GameManager.GameState.COMBAT:
 		_stop_player_navigation()
-		restore_action_points_full()
-
 
 func get_ap_per_meter() -> float:
 	match GameManager.move_mode:

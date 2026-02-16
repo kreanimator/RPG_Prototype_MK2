@@ -14,7 +14,23 @@ var _pending_mouse_pos := Vector2.ZERO
 
 func collect_input() -> InputPackage:
 	var new_input := InputPackage.new()
+		# --- HARD GATE: no player commands during enemy slot ---
+	if GameManager.is_in_combat() and not player.is_player_turn:
+		# eat pending clicks so they don't "fire" when your turn starts
+		_pending_left_click = false
+		_pending_right_click = false
 
+		# Also prevent ActionResolver from continuing to drive actions
+		var resolver := player.player_model.action_resolver as ActionResolver
+		if resolver and resolver.is_executing():
+			resolver.cancel_intent()
+
+		# return pure idle (so player_model keeps updating, but no actions happen)
+		if GameManager.move_mode == GameManager.MoveMode.CROUCH:
+			new_input.actions.append("crouch_idle")
+		new_input.actions.append("idle")
+		return new_input
+	# -------------------------------------------------------
 	# Right click: cycle mouse mode
 	if _pending_right_click:
 		_pending_right_click = false

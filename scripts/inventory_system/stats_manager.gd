@@ -88,8 +88,8 @@ func get_max_health() -> float:
 func get_max_weight() -> float:
 	# Example formula:
 	# base + STR * X
-	var str := get_strength()
-	return float(50 + str * 8)
+	var strength := get_strength()
+	return float(50 + strength * 8)
 
 func get_current_weight_runtime() -> float:
 	# Always compute from inventory
