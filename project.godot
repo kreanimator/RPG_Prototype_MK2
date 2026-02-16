@@ -19,6 +19,7 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 Utils="*uid://blr8r4ugmapp0"
 File="*uid://di64ylho3pulu"
 GameManager="*uid://bjuv8fo6xntu7"
+UiUtils="*uid://ddena467752dd"
 
 [display]
 

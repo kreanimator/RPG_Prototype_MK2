@@ -8,8 +8,10 @@
 [ext_resource type="StyleBox" uid="uid://ck2bnrxjm70my" path="res://resources/ui/ui_panel_body.tres" id="5_grmf5"]
 [ext_resource type="FontFile" uid="uid://d0lknadgmcw6n" path="res://assets/fonts/Gothic 821 Condensed Regular/Gothic 821 Condensed Regular.otf" id="5_oytwm"]
 [ext_resource type="StyleBox" uid="uid://dxqqcab4utwfi" path="res://resources/ui/button_hover.tres" id="6_b6vsu"]
+[ext_resource type="Script" uid="uid://ceuwudi2w8nso" path="res://scripts/ui/hotbar_slots.gd" id="8_m2k08"]
 [ext_resource type="Texture2D" uid="uid://ckk3ahoa1gtm1" path="res://assets/inventory_icons/Consumables/FirstAidKit.png" id="10_73k46"]
 [ext_resource type="Texture2D" uid="uid://dicf4pukgod6u" path="res://assets/inventory_icons/Consumables/EnergyDrink.png" id="11_o1fm1"]
+[ext_resource type="Script" uid="uid://bx24rhhe38r5g" path="res://scripts/ui/move_state_buttons.gd" id="11_y86cm"]
 [ext_resource type="Texture2D" uid="uid://bhkcecrf422u7" path="res://assets/inventory_icons/MiscItems/BigBattery.png" id="12_n6s7f"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_or7gh"]
@@ -299,6 +301,7 @@ script = ExtResource("2_0g03g")
 [node name="UI" type="CanvasLayer" parent="." unique_id=1471273417]
 
 [node name="UIController" type="Control" parent="UI" unique_id=165161596]
+unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -401,6 +404,7 @@ text = "Skills
 [node name="HotbarSlots" type="HBoxContainer" parent="UI/UIController/ControlsContainer/Central" unique_id=2045404039]
 custom_minimum_size = Vector2(0, 66)
 layout_mode = 2
+script = ExtResource("8_m2k08")
 
 [node name="WeaponOne" type="Button" parent="UI/UIController/ControlsContainer/Central/HotbarSlots" unique_id=363705311]
 unique_name_in_owner = true
@@ -694,6 +698,7 @@ layout_mode = 2
 [node name="MoveStateButtons" type="GridContainer" parent="UI/UIController/ControlsContainer/Right/HBoxContainer" unique_id=664815615]
 custom_minimum_size = Vector2(100, 90)
 layout_mode = 2
+script = ExtResource("11_y86cm")
 
 [node name="Walk" type="Button" parent="UI/UIController/ControlsContainer/Right/HBoxContainer/MoveStateButtons" unique_id=179208409]
 unique_name_in_owner = true
