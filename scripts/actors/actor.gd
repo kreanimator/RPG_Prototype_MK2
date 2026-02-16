@@ -13,6 +13,9 @@ signal turn_finished(actor: Actor)
 
 var current_interactable: Interactable = null
 
+func _ready() -> void:
+	add_to_group("actors")
+
 func set_target_position(pos: Vector3) -> void:
 	if nav_agent == null:
 		push_warning("%s has no NavigationAgent3D" % name)

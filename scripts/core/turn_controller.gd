@@ -155,19 +155,17 @@ func _set_current_actor(a: Actor) -> void:
 	if debug_turns:
 		print("[TurnController] _set_current_actor() actor=", _actor_dbg(current_actor), " round=", round_number, " index=", _index)
 
-	active_actor_changed.emit(current_actor)
-
 	# Listen for "actor says I'm done"
-	if current_actor.turn_finished.is_connected(_on_actor_finished):
-		if debug_turns:
-			print("[TurnController] WARNING: turn_finished already connected for actor=", _actor_dbg(current_actor), " (unexpected)")
-	else:
+	if not current_actor.turn_finished.is_connected(_on_actor_finished):
 		current_actor.turn_finished.connect(_on_actor_finished)
 		if debug_turns:
 			print("[TurnController] connected actor.turn_finished -> _on_actor_finished for actor=", _actor_dbg(current_actor))
 
-	# Start-of-turn hook (restore AP here if you want)
+	# Start-of-turn hook FIRST
 	current_actor.on_turn_started(self)
+
+	# THEN notify UI / others
+	active_actor_changed.emit(current_actor)
 
 func _disconnect_from_current_actor() -> void:
 	if current_actor == null:

@@ -2,6 +2,7 @@ extends Node
 class_name PlayerResources
 
 signal action_points_changed(ap: int, max_ap: int)
+signal out_of_ap()
 
 # -------------------------
 # Tunables / constants
@@ -143,10 +144,17 @@ func spend_ap_for_movement(distance_moved_meters: float) -> void:
 	if to_spend <= 0:
 		return
 
+	var prev_ap := action_points
+
 	action_points = max(action_points - to_spend, 0)
 	_ap_meter_accum -= float(to_spend)
 
 	action_points_changed.emit(action_points, max_action_points)
+
+	if prev_ap > 0 and action_points <= 0:
+		GameManager.can_perform_action = false
+		_stop_player_navigation()
+		out_of_ap.emit()
 
 
 func spend_action_points(amount: int) -> bool:
@@ -154,17 +162,29 @@ func spend_action_points(amount: int) -> bool:
 		GameManager.can_perform_action = true
 		return true
 
+	var prev_ap := action_points
+
 	if action_points < amount:
+		action_points = 0
+		action_points_changed.emit(action_points, max_action_points)
 		GameManager.can_perform_action = false
 		_stop_player_navigation()
+		out_of_ap.emit()
 		return false
 
 	action_points -= amount
 	action_points_changed.emit(action_points, max_action_points)
+
+	if prev_ap > 0 and action_points <= 0:
+		GameManager.can_perform_action = false
+		_stop_player_navigation()
+		out_of_ap.emit()
+
 	return true
 
 
 func restore_action_points_full() -> void:
+	GameManager.can_perform_action = true
 	action_points = max_action_points
 	action_points_changed.emit(action_points, max_action_points)
 
@@ -182,9 +202,10 @@ func _stop_player_navigation() -> void:
 		return
 
 	var player := model.player
-	if player.nav_agent:
-		player.nav_agent.target_position = player.global_position
-
+	player.set_target_position(player.global_position)
+	print("STOP NAV: target=", player.nav_agent.target_position, " pos=", player.global_position)
+	var resolver := model.action_resolver as ActionResolver
+	resolver.cancel_intent()
 	if player.player_visuals and player.player_visuals.cursor_manager:
 		player.player_visuals.cursor_manager.hide_target_point()
 
