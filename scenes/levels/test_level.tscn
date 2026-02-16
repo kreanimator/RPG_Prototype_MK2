@@ -267,6 +267,7 @@ size = Vector3(3, 0.5, 4)
 
 [node name="DummyEnemy" parent="." unique_id=1554000348 instance=ExtResource("7_hfwtw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.414871, 1.2374926, 14.145405)
+is_combatant = null
 
 [node name="DummyInteractable" parent="." unique_id=2142339155 instance=ExtResource("6_6xh4u")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12782955, 0.3999981, 11.451701)

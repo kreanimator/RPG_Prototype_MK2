@@ -1,7 +1,13 @@
 extends CharacterBody3D
 class_name Actor
 
+# "Turn" here means this actor's ACTION SLOT in the round order.
+# TurnController listens to this to advance to the next actor.
+signal turn_finished(actor: Actor)
+
 @export var actor_name: String = "Undefined"
+@export var is_combatant: bool = true
+
 @onready var nav_agent: NavigationAgent3D = get_node_or_null("NavigationAgent3D")
 @onready var faction_component: FactionComponent = get_node_or_null("FactionComponent")
 
@@ -24,16 +30,51 @@ func set_nav_agent(radius: float = 0.75,
 	nav_agent.target_desired_distance = target_des_distance
 	nav_agent.avoidance_enabled = true
 	nav_agent.avoidance_priority = 1.0
-	
+
+
+# -------------------------
+# Combat / factions
+# -------------------------
 func is_hostile_to(other: Actor) -> bool:
 	if other == null:
 		return false
 	if faction_component == null or other.faction_component == null:
 		return false
-
 	return faction_component.get_disposition_to(other.faction_component) == FactionComponent.Disposition.HOSTILE
 
 
+func is_alive() -> bool:
+	# Replace later with HP check if you have it
+	return true
+
+
+func can_take_turn() -> bool:
+	# Called by TurnController when selecting next actor
+	return is_combatant and is_alive()
+
+
+# -------------------------
+# Turn lifecycle hooks
+# -------------------------
+func on_turn_started(_turn_controller: Node) -> void:
+	# Override in Player/Enemy
+	pass
+
+
+func on_turn_ended(_turn_controller: Node) -> void:
+	# Override in Player/Enemy
+	pass
+
+
+# Call when this actor is done with its action slot (player pressed End Turn,
+# AI finished thinking/acting, AP hit 0, etc.)
+func finish_turn() -> void:
+	turn_finished.emit(self)
+
+
+# -------------------------
+# Interaction helpers
+# -------------------------
 func get_interaction_info(requester: Actor = null) -> Dictionary:
 	var info := {
 		"name": actor_name,
@@ -48,13 +89,15 @@ func get_interaction_info(requester: Actor = null) -> Dictionary:
 
 	# Disposition relative to requester
 	if requester != null and requester.faction_component and faction_component:
-		var disp = requester.faction_component.get_disposition_to(faction_component)
+		var disp := requester.faction_component.get_disposition_to(faction_component)
 		info["disposition"] = FactionComponent.Disposition.keys()[disp].to_lower()
 
 	return info
 
+
 func set_current_interactable(i: Interactable) -> void:
 	current_interactable = i
+
 
 func clear_current_interactable(i: Interactable) -> void:
 	if current_interactable == i:

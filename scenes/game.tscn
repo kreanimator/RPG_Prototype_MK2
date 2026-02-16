@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://b8d4vty0ukge0" path="res://scenes/levels/test_level.tscn" id="1_yqjtg"]
 [ext_resource type="PackedScene" uid="uid://ocft37wi8css" path="res://scenes/camera.tscn" id="2_yqjtg"]
 [ext_resource type="PackedScene" uid="uid://cs4asu0gglcme" path="res://scenes/player/player.tscn" id="3_lnu2h"]
+[ext_resource type="Script" uid="uid://b21ec3hwq38hh" path="res://scripts/core/turn_controller.gd" id="4_lbhrr"]
 
 [node name="Game" type="Node3D" unique_id=1876924035]
 
@@ -11,6 +12,10 @@
 [node name="Player" parent="." unique_id=1224365205 node_paths=PackedStringArray("camera_node") instance=ExtResource("3_lnu2h")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1663632, 0)
 camera_node = NodePath("../Camera")
+actor_name = "Player"
 
 [node name="Camera" parent="." unique_id=550868725 instance=ExtResource("2_yqjtg")]
 target_path = NodePath("../Player")
+
+[node name="TurnController" type="Node" parent="." unique_id=595381619]
+script = ExtResource("4_lbhrr")

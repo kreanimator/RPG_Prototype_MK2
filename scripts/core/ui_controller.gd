@@ -32,6 +32,7 @@ class_name UIController
 const POINT_BODY := preload("uid://c83iqwhaadj3n")
 var selected_color: Color = Color("#ffff87")
 
+var turn_controller: TurnController = null
 var resources: PlayerResources = null
 
 # Optional: track which weapon button is “selected” visually (slot selection later)
@@ -48,7 +49,7 @@ func _ready() -> void:
 
 	if GameManager.has_signal("game_state_changed"):
 		GameManager.game_state_changed.connect(_on_game_state_changed)
-
+	turn_controller = get_tree().get_first_node_in_group("turn_controller")
 
 func set_player_resources(res: PlayerResources) -> void:
 	_disconnect_resources()
@@ -126,16 +127,39 @@ func _on_crouch_button_pressed() -> void:
 	_update_move_mode_buttons()
 
 
-# Core button placeholders
 func _on_turn_button_pressed() -> void:
-	# TODO: hook into turn system
-	pass
+	if GameManager.game_state != GameManager.GameState.COMBAT:
+		return
+
+	# Always re-fetch (TurnController may be spawned later)
+	if turn_controller == null or not is_instance_valid(turn_controller):
+		turn_controller = get_tree().get_first_node_in_group("turn_controller")
+
+	if turn_controller == null:
+		print("[UI] End Turn pressed but no TurnController found in group")
+		return
+
+	print("[UI] End Turn pressed -> end_current_actor_turn() current=", turn_controller.current_actor)
+	turn_controller.end_current_actor_turn()
+
 
 func _on_combat_button_pressed() -> void:
 	GameManager.toggle_combat("ui_button")
 	_update_combat_button()
 	update_ap_ui()
 	_update_weapon_buttons_ui()
+
+	# Start/stop turn system
+	if turn_controller == null or not is_instance_valid(turn_controller):
+		turn_controller = get_tree().get_first_node_in_group("turn_controller")
+
+	if turn_controller:
+		if GameManager.game_state == GameManager.GameState.COMBAT:
+			print("[UI] Combat ON -> start_combat()")
+			turn_controller.start_combat()
+		else:
+			print("[UI] Combat OFF -> end_combat()")
+			turn_controller.end_combat()
 
 func _on_skills_button_pressed() -> void:
 	# TODO: open skills UI
