@@ -234,6 +234,11 @@ func _level_up() -> void:
 # -------------------------
 
 func to_dict() -> Dictionary:
+	# Build skills dictionary
+	var skills_dict := {}
+	for skill_name in skills_base.keys():
+		skills_dict[skill_name] = get_skill_base(skill_name)
+	
 	return {
 		"global_position": _vector3_to_array(global_position),
 		"look_direction": _vector3_to_array(look_direction),
@@ -245,7 +250,8 @@ func to_dict() -> Dictionary:
 		"max_experience": max_experience,
 
 		"hp_current": health,
-		"statuses": statuses.duplicate()
+		"statuses": statuses.duplicate(),
+		"skills": skills_dict
 	}
 
 
@@ -276,8 +282,16 @@ func from_dict(data: Dictionary) -> void:
 	for s in incoming_statuses:
 		statuses.append(String(s))
 	
+	# Load skills base values (fail-fast: must exist)
+	var skills_data = data["skills"] as Dictionary
+	for skill_name in skills_base.keys():
+		set_skill_base(skill_name, int(skills_data[skill_name]))
+	
 	# Calculate initial sequence (will be recalculated on combat start)
 	calculate_sequence(false)
+	
+	# Recompute derived stats (including skills)
+	recompute_derived_stats()
 
 
 # Helper methods for serialization

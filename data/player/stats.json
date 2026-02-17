@@ -21,6 +21,13 @@
   "statuses": [],
   "inventory": [],
   "equipment": {},
-  "skills": [],
+  "skills": {
+    "unarmed": 5,
+    "melee_weapons": 5,
+    "small_guns": 5,
+    "big_guns": 5,
+    "energy_weapons": 5,
+    "throwing": 5
+  },
   "quests": []
 }

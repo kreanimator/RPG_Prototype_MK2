@@ -87,6 +87,7 @@ func _init_resources() -> void:
 	# Only init when BOTH are ready (prevents em=<null> cases)
 	if inventory_manager != null and equipment_manager != null:
 		resources.model = self
+		resources.set_actor(player)  # Set actor reference for proper debug output
 		resources._init_stats(stats_manager, inventory_manager, equipment_manager)
 		_resources_initialized = true
 

@@ -48,6 +48,20 @@ var luck: int = 3
 # Perk multipliers (for future use)
 var sequence_multiplier: float = 1.0
 
+# Skills system
+# Base skill values (0-100%, can be modified by perks/equipment)
+var skills_base: Dictionary = {
+	"unarmed": 5,
+	"melee_weapons": 5,
+	"small_guns": 5,
+	"big_guns": 5,
+	"energy_weapons": 5,
+	"throwing": 5,
+}
+
+# Calculated skill values (base + stat bonuses)
+var skills: Dictionary = {}
+
 # -------------------------
 # Runtime references
 # -------------------------
@@ -121,10 +135,13 @@ func initialize_stats(
 	else:
 		statuses = [] as Array[String]
 	
+	# Initialize skills base values (can be overridden in subclasses)
+	_initialize_skills_base()
+	
 	# Calculate initial sequence (will be recalculated on combat start)
 	calculate_sequence(false)
 	
-	# Recompute any derived stats
+	# Recompute any derived stats (including skills)
 	recompute_derived_stats()
 
 
@@ -326,12 +343,94 @@ func set_base_stats(
 	intelligence = intelligence_value
 	agility = agility_value
 	luck = luck_value
+	
+	# Recalculate skills when stats change
+	recalculate_skills()
+
+
+# -------------------------
+# Skills System
+# -------------------------
+func _initialize_skills_base() -> void:
+	# Initialize base skill values (override in subclasses to set custom bases)
+	# Skills start at 0% by default
+	pass
+
+
+## Calculate skill value based on base + stat bonuses (Fallout 2 formula)
+## Returns: base_skill + (stat_multiplier * stat_value), clamped to 0-100
+func calculate_skill(skill_name: String) -> int:
+	var base := skills_base[skill_name] as int
+	var calculated: int
+	
+	match skill_name:
+		"unarmed":
+			# Unarmed: base + (Strength * 2) + (Endurance * 2)
+			calculated = base + (strength * 2) + (endurance * 2)
+		"melee_weapons":
+			# Melee Weapons: base + (Strength * 2)
+			calculated = base + (strength * 2)
+		"small_guns":
+			# Small Guns (pistols, revolvers): base + (Agility * 2)
+			calculated = base + (agility * 2)
+		"big_guns":
+			# Big Guns (heavy weapons): base + (Endurance * 2)
+			calculated = base + (endurance * 2)
+		"energy_weapons":
+			# Energy Weapons: base + (Perception * 2)
+			calculated = base + (perception * 2)
+		"throwing":
+			# Throwing: base + (Agility * 2)
+			calculated = base + (agility * 2)
+		_:
+			calculated = base
+	
+	return clamp(calculated, 0, 100)
+
+
+## Recalculate all skills (called when stats change)
+func recalculate_skills() -> void:
+	var actor_name = actor.actor_name if actor else "Unknown"
+	print("[ActorResources] Recalculating skills for: ", actor_name)
+	
+	for skill_name in skills_base.keys():
+		var base_value := skills_base[skill_name] as int
+		var calculated_value := calculate_skill(skill_name)
+		skills[skill_name] = calculated_value
+		print("  ", skill_name, ": base=", base_value, " -> calculated=", calculated_value)
+
+
+## Get current skill value (base + stat bonuses)
+func get_skill(skill_name: String) -> int:
+	if not skills.has(skill_name):
+		skills[skill_name] = calculate_skill(skill_name)
+	return skills[skill_name] as int
+
+
+## Set base skill value (before stat bonuses, clamped to 0-100)
+func set_skill_base(skill_name: String, base_value: int) -> void:
+	skills_base[skill_name] = clamp(base_value, 0, 100)
+	skills[skill_name] = calculate_skill(skill_name)
+
+
+## Add to base skill value
+func add_skill_base(skill_name: String, amount: int) -> void:
+	var current_base := skills_base[skill_name] as int
+	set_skill_base(skill_name, current_base + amount)
+
+
+## Get base skill value (without stat bonuses)
+func get_skill_base(skill_name: String) -> int:
+	return skills_base[skill_name] as int
 
 
 # -------------------------
 # Derived Stats (override in subclasses)
 # -------------------------
 func recompute_derived_stats() -> void:
+	# Recalculate skills when stats change
+	recalculate_skills()
+	
 	# Override in subclasses to compute max_health, max_action_points, armor, etc.
 	# This is called after level ups, equipment changes, etc.
 	pass
