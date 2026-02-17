@@ -153,12 +153,67 @@ func assign_combos():
 			
 
 func form_hit_data(_weapon : Weapon) -> HitData:
-	return HitData.blank()
+	var hit_data := HitData.blank()
+	
+	# If no weapon, calculate unarmed damage
+	if _weapon == null or (_weapon.weapon_type == Weapon.WeaponType.UNARMED and _weapon.min_damage <= 0):
+		var stats := player.player_model.stats_manager as StatsManager
+		var unarmed_action := stats.get_unarmed_action_key()
+		var damage_range := _get_unarmed_damage_range(unarmed_action)
+		hit_data.damage = float(randi_range(damage_range[0], damage_range[1]))
+		print("[Combat] Unarmed %s damage: %.1f (range: %d-%d)" % [unarmed_action, hit_data.damage, damage_range[0], damage_range[1]])
+	else:
+		# Use weapon damage
+		hit_data.damage = _weapon.calculate_damage()
+		print("[Combat] Weapon damage: %.1f (range: %.1f-%.1f)" % [hit_data.damage, _weapon.min_damage, _weapon.max_damage])
+	
+	hit_data.weapon = _weapon
+	return hit_data
+
+
+func _get_unarmed_damage_range(action: String) -> Array:
+	match action:
+		"punch":
+			return [3, 7]  # min, max
+		"kick":
+			return [4, 10]  # min, max
+		_:
+			return [3, 7]  # default to punch
 
 
 func react_on_hit(hit : HitData):
-	if is_vulnerable():
-		resources.take_damage(hit.damage)
+	if not is_vulnerable():
+		hit.queue_free()
+		return
+	
+	# Check hit chance for melee attacks (weapon can be null for unarmed)
+	var attacker: Actor = null
+	if hit.weapon != null and hit.weapon.holder != null:
+		attacker = hit.weapon.holder.player as Actor
+	else:
+		# Unarmed attack - get attacker from hit data or find it another way
+		# For now, assume attacker is stored elsewhere or we skip hit chance check
+		pass
+	
+	var target := player as Actor
+	
+	if attacker != null and target != null:
+		var hit_result := CombatCalculator.calculate_and_roll_hit(attacker, target, hit.weapon)
+		
+		if not hit_result["hit"]:
+			# Attack missed
+			print("[Combat] MISS! Hit chance: %d%%, Roll: %d (need <= %d)" % [hit_result["hit_chance"], hit_result["roll"], hit_result["hit_chance"]])
+			hit.queue_free()
+			return
+		
+		# Attack hit - apply damage
+		print("[Combat] HIT! Hit chance: %d%%, Roll: %d (need <= %d)" % [hit_result["hit_chance"], hit_result["roll"], hit_result["hit_chance"]])
+	
+	# Apply damage (either hit succeeded or no weapon/hit chance check needed)
+	var final_damage := hit.damage
+	print("[Combat] Damage dealt: %.1f" % final_damage)
+	resources.take_damage(final_damage)
+	
 	if is_interruptable():
 		try_force_move("hit")
 	hit.queue_free()

@@ -11,6 +11,7 @@ class_name BulletBase
 @export var bullet_impact_scene: PackedScene
 var direction: Vector3 = Vector3.FORWARD
 var shooter: Node3D = null
+var weapon: Weapon = null  # Weapon that fired this bullet
 var previous_position: Vector3 = Vector3.ZERO
 
 func _ready() -> void:
@@ -26,11 +27,12 @@ func _ready() -> void:
 	timer.timeout.connect(_destroy_bullet)
 	timer.start()
 
-func initialize(start_position: Vector3, target_direction: Vector3, bullet_shooter: Node3D = null) -> void:
+func initialize(start_position: Vector3, target_direction: Vector3, bullet_shooter: Node3D = null, bullet_weapon: Weapon = null) -> void:
 	global_position = start_position
 	previous_position = start_position
 	direction = target_direction.normalized()
 	shooter = bullet_shooter
+	weapon = bullet_weapon
 	linear_velocity = direction * speed
 
 
@@ -146,14 +148,22 @@ func _handle_body_collision(_body: Node) -> void:
 func _handle_player_collision(player: Node) -> void:
 	var player_model = player.get_node("PlayerModel") as PlayerModel
 	if player_model and player_model.resources:
-		player_model.resources.take_damage(damage)
-		#print(get_script().get_global_name(), ": Hit player for ", damage, " damage!")
+		# Check hit chance for ranged attacks
+		if _check_hit_chance(player as Actor):
+			print("[Combat] Ranged attack HIT player! Damage: %.1f" % damage)
+			player_model.resources.take_damage(damage)
+		else:
+			print("[Combat] Ranged attack MISSED player!")
 
 ## Handle enemy collision
 func _handle_enemy_collision(enemy: Node) -> void:
 	if enemy.has_method("take_damage"):
-		enemy.take_damage(damage)
-		#print(get_script().get_global_name(), ": Hit enemy for ", damage, " damage!")
+		# Check hit chance for ranged attacks
+		if _check_hit_chance(enemy as Actor):
+			print("[Combat] Ranged attack HIT enemy! Damage: %.1f" % damage)
+			enemy.take_damage(damage)
+		else:
+			print("[Combat] Ranged attack MISSED enemy!")
 
 ## Handle rigid body collision (for physics objects)
 func _handle_rigid_body_collision(rigid_body: RigidBody3D) -> void:
@@ -177,6 +187,39 @@ func _apply_impact_force(rigid_body: RigidBody3D) -> void:
 
 func _create_impact_effect() -> void:
 	pass
+
+## Check hit chance for ranged attacks
+## Returns true if attack hits, false if it misses
+func _check_hit_chance(target: Actor) -> bool:
+	if target == null or shooter == null:
+		return true  # Default to hit if we can't determine
+	
+	# Get attacker from shooter
+	var attacker: Actor = null
+	if shooter is Player:
+		attacker = (shooter as Player) as Actor
+	elif shooter is Player:
+		attacker = shooter as Actor
+	elif shooter is Actor:
+		attacker = shooter as Actor
+	
+	if attacker == null:
+		return true  # Default to hit if we can't determine attacker
+	
+	# Get weapon (prefer stored weapon, otherwise try to get from shooter)
+	var attack_weapon: Weapon = weapon
+	if attack_weapon == null and shooter is Player:
+		var player_model := shooter as Player
+		if player_model.equipment_manager != null:
+			attack_weapon = player_model.equipment_manager.current_weapon
+	
+	# Calculate hit chance and roll
+	var hit_result := CombatCalculator.calculate_and_roll_hit(attacker, target, attack_weapon)
+	
+	if not hit_result["hit"]:
+		print("[Combat] Ranged attack missed! Hit chance: %d%%, Roll: %d" % [hit_result["hit_chance"], hit_result["roll"]])
+	
+	return hit_result["hit"]
 
 func _destroy_bullet() -> void:
 	queue_free()

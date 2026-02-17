@@ -15,6 +15,10 @@ func accept_model(_model: PlayerModel) -> void:
 		if child is MeshInstance3D:
 			child.skeleton = _model.skeleton.get_path()
 
+	# Pass model to cursor manager for hit chance display
+	if cursor_manager:
+		cursor_manager.set_player_model(_model)
+
 	# Pass resources to UI (deferred = safe init order)
 	call_deferred("_bind_ui_resources")
 

@@ -277,7 +277,7 @@ func _fire_single_bullet(target_direction: Vector3, target_position: Vector3) ->
 	scene.add_child(bullet)
 	
 	# Initialize bullet with randomized properties
-	bullet.initialize(shoot_position, direction, holder.player if holder else null)
+	bullet.initialize(shoot_position, direction, holder.player if holder else null, self)
 	bullet.speed = final_bullet_speed
 	bullet.damage = calculate_damage()
 	bullet.call_deferred("_rotate_towards_direction", direction)
