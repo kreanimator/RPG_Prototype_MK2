@@ -15,6 +15,7 @@ var current_actor: Actor = null
 var actors_list: Array[Actor] = []
 var _index: int = -1
 var _running: bool = false
+var _prev_index: int = -1  # Track previous index for round detection
 
 
 func _ready() -> void:
@@ -48,17 +49,15 @@ func end_combat() -> void:
 		print("[TurnController] end_combat() running=", _running, " current_actor=", _actor_dbg(current_actor), " round=", round_number)
 
 	_running = false
-	_disconnect_from_current_actor()
-	current_actor = null
-	_index = -1
+	_clear_current_actor()
 
 
 func reset() -> void:
 	_running = false
 	round_number = 0
 	_index = -1
-	_disconnect_from_current_actor()
-	current_actor = null
+	_prev_index = -1
+	_clear_current_actor()
 	actors_list.clear()
 
 
@@ -67,6 +66,7 @@ func reset() -> void:
 func refresh_roster() -> void:
 	var prev_current := current_actor
 
+	# Build new roster
 	actors_list.clear()
 	var nodes := get_tree().get_nodes_in_group(actor_group)
 	for n in nodes:
@@ -82,10 +82,14 @@ func refresh_roster() -> void:
 	# Re-anchor index to current actor if possible
 	if prev_current != null and is_instance_valid(prev_current):
 		var idx := actors_list.find(prev_current)
-		_index = idx
-		# if current actor disappeared, we'll advance on next call
+		if idx != -1:
+			_index = idx
+		else:
+			# Current actor disappeared, reset to start
+			_index = -1
 	else:
-		_index = actors_list.find(prev_current)
+		# No previous actor, start from beginning
+		_index = -1
 
 
 # UI calls this (your End Turn button)
@@ -101,9 +105,10 @@ func end_current_actor_turn() -> void:
 	# Let actor clean up
 	current_actor.on_turn_ended(self)
 
+	# Disconnect but keep index so we can advance from current position
 	_disconnect_from_current_actor()
 	current_actor = null
-
+	
 	_advance_to_next_actor()
 
 
@@ -118,21 +123,22 @@ func _advance_to_next_actor() -> void:
 		return
 
 	if actors_list.is_empty():
-		# No actors = nothing to do. Caller decides what "combat end" means.
 		if debug_turns:
 			print("[TurnController] _advance_to_next_actor() -> no actors. staying idle (running=false)")
 		_running = false
-		_disconnect_from_current_actor()
-		current_actor = null
 		return
 
+	var list_size := actors_list.size()
 	var tries := 0
-	while tries < actors_list.size():
-		_index = (_index + 1) % actors_list.size()
+	var start_index := _index
+
+	while tries < list_size:
+		_prev_index = _index
+		_index = (_index + 1) % list_size
 		tries += 1
 
-		# If we wrapped, new round
-		if _index == 0 and tries > 1:
+		# Detect round wrap: when we go from last index back to 0
+		if _prev_index >= 0 and _prev_index == list_size - 1 and _index == 0:
 			round_number += 1
 			round_changed.emit(round_number)
 			if debug_turns:
@@ -157,8 +163,6 @@ func _advance_to_next_actor() -> void:
 	if debug_turns:
 		print("[TurnController] _advance_to_next_actor() -> nobody eligible. staying idle (running=false)")
 	_running = false
-	_disconnect_from_current_actor()
-	current_actor = null
 
 
 func _set_current_actor(a: Actor) -> void:
@@ -178,11 +182,20 @@ func _set_current_actor(a: Actor) -> void:
 	active_actor_changed.emit(current_actor)
 
 
+func _clear_current_actor() -> void:
+	_disconnect_from_current_actor()
+	current_actor = null
+	_index = -1
+	_prev_index = -1
+
+
 func _disconnect_from_current_actor() -> void:
 	if current_actor == null:
 		return
+	
 	if not is_instance_valid(current_actor):
 		return
+	
 	if current_actor.turn_finished.is_connected(_on_actor_finished):
 		current_actor.turn_finished.disconnect(_on_actor_finished)
 
@@ -206,6 +219,7 @@ func _actor_dbg(a: Actor) -> String:
 	if an == "":
 		an = a.name
 	return "%s(%s)" % [an, a.get_class()]
+
 
 func _actors_debug_list() -> String:
 	var parts: Array[String] = []
