@@ -97,7 +97,8 @@ func _on_combat_button_pressed() -> void:
 
 	if GameManager.game_state == GameManager.GameState.COMBAT:
 		print("[UI] Combat ON -> start_combat()")
-		turn_controller.start_combat()
+		# Player always starts combat when initiated from UI
+		turn_controller.start_combat(player)
 	else:
 		print("[UI] Combat OFF -> end_combat()")
 		turn_controller.end_combat()

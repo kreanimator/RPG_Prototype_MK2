@@ -176,3 +176,7 @@ func _push_rigid_bodies() -> void:
 			var knockback_force = 2.0 * mass_ratio
 
 			rigid_body.apply_impulse(knockback_dir * knockback_force)
+
+
+func get_resources() -> PlayerResources:
+	return player_model.resources if player_model else null

@@ -4,8 +4,46 @@ class_name DummyEnemy
 @export var auto_end_delay_sec: float = 10.0
 @export var debug_ai: bool = true
 
+# Debug stats for testing - full initialization
+@export var debug_level: int = 1
+@export var debug_strength: int = 3
+@export var debug_perception: int = 3
+@export var debug_endurance: int = 3
+@export var debug_charisma: int = 3
+@export var debug_intelligence: int = 3
+@export var debug_agility: int = 3
+@export var debug_luck: int = 3
+@export var debug_health: float = 100.0
+@export var debug_max_health: float = 100.0
+@export var debug_max_action_points: int = 10
+@export var debug_armor: int = 0
+
+@onready var resources: EnemyResources = $Resources
+
 var _tc_ref: TurnController = null
 var _auto_end_token: int = 0
+
+func _ready() -> void:
+	super._ready()
+	
+	# Initialize resources with full debug stats
+	if resources:
+		resources.set_actor(self)
+		resources.initialize_enemy_stats(
+			debug_strength,
+			debug_perception,
+			debug_endurance,
+			debug_charisma,
+			debug_intelligence,
+			debug_agility,
+			debug_luck,
+			debug_health,
+			debug_max_health,
+			debug_level,
+			debug_max_action_points,
+			debug_armor
+		)
+
 
 func on_turn_started(tc: Node) -> void:
 	_tc_ref = tc as TurnController

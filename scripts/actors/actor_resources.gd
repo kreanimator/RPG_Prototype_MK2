@@ -33,6 +33,21 @@ var statuses: Array[String] = []
 # Armor/Damage Resistance
 var armor: int = 0
 
+# Sequence stat (turn order)
+var sequence: int = 0
+
+# Base stats (S.P.E.C.I.A.L. - Fallout-like)
+var strength: int = 3
+var perception: int = 3
+var endurance: int = 3
+var charisma: int = 3
+var intelligence: int = 3
+var agility: int = 3
+var luck: int = 3
+
+# Perk multipliers (for future use)
+var sequence_multiplier: float = 1.0
+
 # -------------------------
 # Runtime references
 # -------------------------
@@ -49,6 +64,68 @@ func _ready() -> void:
 func update(_delta: float) -> void:
 	# Override in subclasses for per-frame updates (e.g., HP regen)
 	pass
+
+
+## Initialize all stats for an actor
+## Override in subclasses to add additional initialization
+func initialize_stats(
+		level_value: int = 1,
+		experience_value: int = 0,
+		max_experience_value: int = 1000,
+		health_value: float = 100.0,
+		max_health_value: float = 100.0,
+		hp_regeneration_value: float = 0.0,
+		action_points_value: int = 0,
+		max_action_points_value: int = 10,
+		armor_value: int = 0,
+		strength_value: int = 3,
+		perception_value: int = 3,
+		endurance_value: int = 3,
+		charisma_value: int = 3,
+		intelligence_value: int = 3,
+		agility_value: int = 3,
+		luck_value: int = 3,
+		sequence_multiplier_value: float = 1.0,
+		statuses_array: Array[String] = []
+	) -> void:
+	# Core stats
+	level = level_value
+	experience = experience_value
+	max_experience = max_experience_value
+	
+	# Health system
+	health = health_value
+	max_health = max_health_value
+	hp_regeneration = hp_regeneration_value
+	
+	# Action Points
+	action_points = action_points_value
+	max_action_points = max_action_points_value
+	
+	# Armor
+	armor = armor_value
+	
+	# Base stats (S.P.E.C.I.A.L.)
+	strength = strength_value
+	perception = perception_value
+	endurance = endurance_value
+	charisma = charisma_value
+	intelligence = intelligence_value
+	agility = agility_value
+	luck = luck_value
+	sequence_multiplier = sequence_multiplier_value
+	
+	# Status effects
+	if not statuses_array.is_empty():
+		statuses = statuses_array.duplicate() as Array[String]
+	else:
+		statuses = [] as Array[String]
+	
+	# Calculate initial sequence (will be recalculated on combat start)
+	calculate_sequence(false)
+	
+	# Recompute any derived stats
+	recompute_derived_stats()
 
 
 # -------------------------
@@ -212,6 +289,43 @@ func has_status(status: String) -> bool:
 func clear_all_statuses() -> void:
 	if not statuses.is_empty():
 		statuses.clear()
+
+
+# -------------------------
+# Sequence Calculation
+# -------------------------
+func calculate_sequence(is_combat_initiator: bool = false) -> void:
+	# Base formula: sequence = (perception * 2) + agility
+	var base_sequence := (perception * 2) + agility
+	
+	# Apply combat initiator bonus
+	if is_combat_initiator:
+		base_sequence *= 2
+	
+	# Apply perk multiplier (for future use)
+	sequence = int(base_sequence * sequence_multiplier)
+
+
+func get_sequence() -> int:
+	return sequence
+
+
+func set_base_stats(
+		strength_value: int = 3,
+		perception_value: int = 3,
+		endurance_value: int = 3,
+		charisma_value: int = 3,
+		intelligence_value: int = 3,
+		agility_value: int = 3,
+		luck_value: int = 3
+	) -> void:
+	strength = strength_value
+	perception = perception_value
+	endurance = endurance_value
+	charisma = charisma_value
+	intelligence = intelligence_value
+	agility = agility_value
+	luck = luck_value
 
 
 # -------------------------

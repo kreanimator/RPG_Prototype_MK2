@@ -15,7 +15,8 @@ var current_actor: Actor = null
 var actors_list: Array[Actor] = []
 var _index: int = -1
 var _running: bool = false
-var _prev_index: int = -1  # Track previous index for round detection
+var _prev_index: int = -1
+var _combat_initiator: Actor = null
 
 
 func _ready() -> void:
@@ -28,16 +29,18 @@ func _ready() -> void:
 # Public API
 # -------------------------
 
-func start_combat() -> void:
+func start_combat(initiator: Actor = null) -> void:
 	if debug_turns:
-		print("[TurnController] start_combat()")
+		print("[TurnController] start_combat() initiator=", _actor_dbg(initiator))
 
 	reset()
 
 	_running = true
-	refresh_roster()
+	_combat_initiator = initiator
+	
+	_build_roster()
+	_recalculate_sequence_for_all_actors()
 
-	# Start from round 1 on first selection
 	round_number = 1
 	round_changed.emit(round_number)
 
@@ -57,24 +60,19 @@ func reset() -> void:
 	round_number = 0
 	_index = -1
 	_prev_index = -1
+	_combat_initiator = null
 	_clear_current_actor()
 	actors_list.clear()
 
 
-# Call this if actors are spawned/removed during combat.
-# Keeps current actor if still present; otherwise advances.
 func refresh_roster() -> void:
 	var prev_current := current_actor
 
-	# Build new roster
-	actors_list.clear()
-	var nodes := get_tree().get_nodes_in_group(actor_group)
-	for n in nodes:
-		if n is Actor:
-			actors_list.append(n)
+	_build_roster()
+	_sort_actors_by_sequence()
 
 	if debug_roster:
-		print("[TurnController] refresh_roster() size=", actors_list.size(), " actors=", _actors_debug_list())
+		_debug_print_roster()
 
 	if not _running:
 		return
@@ -82,17 +80,11 @@ func refresh_roster() -> void:
 	# Re-anchor index to current actor if possible
 	if prev_current != null and is_instance_valid(prev_current):
 		var idx := actors_list.find(prev_current)
-		if idx != -1:
-			_index = idx
-		else:
-			# Current actor disappeared, reset to start
-			_index = -1
+		_index = idx if idx != -1 else -1
 	else:
-		# No previous actor, start from beginning
 		_index = -1
 
 
-# UI calls this (your End Turn button)
 func end_current_actor_turn() -> void:
 	if not _running or current_actor == null:
 		if debug_turns:
@@ -102,10 +94,7 @@ func end_current_actor_turn() -> void:
 	if debug_turns:
 		print("[TurnController] end_current_actor_turn() actor=", _actor_dbg(current_actor), " round=", round_number, " index=", _index)
 
-	# Let actor clean up
 	current_actor.on_turn_ended(self)
-
-	# Disconnect but keep index so we can advance from current position
 	_disconnect_from_current_actor()
 	current_actor = null
 	
@@ -130,7 +119,6 @@ func _advance_to_next_actor() -> void:
 
 	var list_size := actors_list.size()
 	var tries := 0
-	var start_index := _index
 
 	while tries < list_size:
 		_prev_index = _index
@@ -141,6 +129,7 @@ func _advance_to_next_actor() -> void:
 		if _prev_index >= 0 and _prev_index == list_size - 1 and _index == 0:
 			round_number += 1
 			round_changed.emit(round_number)
+			_recalculate_sequence_for_all_actors()
 			if debug_turns:
 				print("[TurnController] round_changed -> ", round_number)
 
@@ -159,7 +148,7 @@ func _advance_to_next_actor() -> void:
 		_set_current_actor(a)
 		return
 
-	# Nobody eligible: pause scheduling. Caller can refresh roster or end combat.
+	# Nobody eligible: pause scheduling
 	if debug_turns:
 		print("[TurnController] _advance_to_next_actor() -> nobody eligible. staying idle (running=false)")
 	_running = false
@@ -171,14 +160,10 @@ func _set_current_actor(a: Actor) -> void:
 	if debug_turns:
 		print("[TurnController] _set_current_actor() actor=", _actor_dbg(current_actor), " round=", round_number, " index=", _index)
 
-	# Listen for "actor says I'm done"
 	if not current_actor.turn_finished.is_connected(_on_actor_finished):
 		current_actor.turn_finished.connect(_on_actor_finished)
 
-	# Start-of-turn hook FIRST
 	current_actor.on_turn_started(self)
-
-	# THEN notify UI / others
 	active_actor_changed.emit(current_actor)
 
 
@@ -207,6 +192,65 @@ func _on_actor_finished(_actor: Actor) -> void:
 
 
 # -------------------------
+# Sequence Management
+# -------------------------
+
+func _build_roster() -> void:
+	actors_list.clear()
+	var nodes := get_tree().get_nodes_in_group(actor_group)
+	for n in nodes:
+		if n is Actor:
+			actors_list.append(n)
+
+
+func _sort_actors_by_sequence() -> void:
+	actors_list.sort_custom(func(a: Actor, b: Actor) -> bool:
+		return _get_actor_sequence(a) > _get_actor_sequence(b)
+	)
+
+
+func _get_actor_resources(actor: Actor) -> ActorResources:
+	if actor is Player:
+		var player := actor as Player
+		return player.player_model.resources
+	else:
+		return actor.get_node("Resources") as ActorResources
+
+
+func _get_actor_sequence(actor: Actor) -> int:
+	return _get_actor_resources(actor).get_sequence()
+
+
+func _recalculate_sequence_for_all_actors() -> void:
+	for actor in actors_list:
+		if not is_instance_valid(actor):
+			continue
+		
+		var is_initiator := (actor == _combat_initiator)
+		var resources := _get_actor_resources(actor)
+		
+		resources.calculate_sequence(is_initiator)
+		
+		if debug_turns:
+			var base_seq := (resources.perception * 2) + resources.agility
+			var final_seq := resources.get_sequence()
+			print("[TurnController]   %s: PER=%d AGL=%d base_seq=%d initiator=%s final_seq=%d" % [
+				_actor_dbg(actor),
+				resources.perception,
+				resources.agility,
+				base_seq,
+				is_initiator,
+				final_seq
+			])
+	
+	_sort_actors_by_sequence()
+	
+	if debug_turns:
+		print("[TurnController] _recalculate_sequence_for_all_actors() initiator=", _actor_dbg(_combat_initiator))
+		_debug_print_sorted_roster()
+
+
+# -------------------------
 # Debug helpers
 # -------------------------
 
@@ -226,3 +270,19 @@ func _actors_debug_list() -> String:
 	for a in actors_list:
 		parts.append(_actor_dbg(a))
 	return "[" + ", ".join(parts) + "]"
+
+
+func _debug_print_roster() -> void:
+	print("[TurnController] refresh_roster() size=", actors_list.size(), " actors=", _actors_debug_list())
+	if debug_turns:
+		for i in range(actors_list.size()):
+			var a := actors_list[i]
+			var seq := _get_actor_sequence(a)
+			print("[TurnController]   [%d] %s sequence=%d" % [i, _actor_dbg(a), seq])
+
+
+func _debug_print_sorted_roster() -> void:
+	for i in range(actors_list.size()):
+		var a := actors_list[i]
+		var seq := _get_actor_sequence(a)
+		print("[TurnController]   SORTED [%d] %s sequence=%d" % [i, _actor_dbg(a), seq])

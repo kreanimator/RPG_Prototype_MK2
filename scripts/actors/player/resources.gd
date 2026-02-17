@@ -90,15 +90,11 @@ func recompute_derived_stats() -> void:
 	armor = stats_manager.get_armor_value()
 
 	# Derived current weight
-	if inventory_manager:
-		current_weight = inventory_manager.get_total_weight()
+	current_weight = inventory_manager.get_total_weight()
 	
 	# Clamp current values to caps
 	health = clamp(health, 0.0, max_health)
 	action_points = clamp(action_points, 0, max_action_points)
-
-	# Notify UI (important when max AP changes after load/level-up)
-	# Only emit if values actually changed (handled by base class now)
 
 
 # -------------------------
@@ -173,18 +169,13 @@ func _handle_out_of_ap() -> void:
 
 
 func _stop_player_navigation() -> void:
-	if not model or not model.player:
-		return
-
 	var player := model.player
 	player.set_target_position(player.global_position)
 	
 	var resolver := model.action_resolver as ActionResolver
-	if resolver:
-		resolver.cancel_intent()
+	resolver.cancel_intent()
 	
-	if player.player_visuals and player.player_visuals.cursor_manager:
-		player.player_visuals.cursor_manager.hide_target_point()
+	player.player_visuals.cursor_manager.hide_target_point()
 
 
 # -------------------------
@@ -269,13 +260,24 @@ func from_dict(data: Dictionary) -> void:
 	experience = int(data["experience"])
 	max_experience = int(data["max_experience"])
 	health = float(data["hp_current"])
+	
+	# Load all base stats (S.P.E.C.I.A.L.)
+	strength = int(data["strength"])
+	perception = int(data["perception"])
+	endurance = int(data["endurance"])
+	charisma = int(data["charisma"])
+	intelligence = int(data["intelligence"])
+	agility = int(data["agility"])
+	luck = int(data["luck"])
 
 	# Load statuses
-	var incoming_statuses = data.get("statuses", [])
+	var incoming_statuses = data["statuses"]
 	statuses.clear()
 	for s in incoming_statuses:
-		if s is String:
-			statuses.append(s)
+		statuses.append(String(s))
+	
+	# Calculate initial sequence (will be recalculated on combat start)
+	calculate_sequence(false)
 
 
 # Helper methods for serialization
