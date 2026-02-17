@@ -217,6 +217,9 @@ func take_damage(amount: float) -> void:
 	
 	if health != prev_health:
 		health_changed.emit(health, max_health)
+		# Show damage indicator
+		if actor != null:
+			DamageIndicator.create_at_position(actor.global_position, DamageIndicator.IndicatorType.DAMAGE, damage_after_armor)
 	
 	if health <= 0.0 and prev_health > 0.0:
 		_on_death()
@@ -231,6 +234,9 @@ func gain_health(amount: float) -> void:
 	
 	if health != prev_health:
 		health_changed.emit(health, max_health)
+		# Show heal indicator
+		if actor != null:
+			DamageIndicator.create_at_position(actor.global_position, DamageIndicator.IndicatorType.HEAL, amount)
 
 
 func heal_full() -> void:
@@ -390,14 +396,9 @@ func calculate_skill(skill_name: String) -> int:
 
 ## Recalculate all skills (called when stats change)
 func recalculate_skills() -> void:
-	var actor_name = actor.actor_name if actor else "Unknown"
-	print("[ActorResources] Recalculating skills for: ", actor_name)
-	
 	for skill_name in skills_base.keys():
-		var base_value := skills_base[skill_name] as int
 		var calculated_value := calculate_skill(skill_name)
 		skills[skill_name] = calculated_value
-		print("  ", skill_name, ": base=", base_value, " -> calculated=", calculated_value)
 
 
 ## Get current skill value (base + stat bonuses)

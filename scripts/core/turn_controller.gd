@@ -188,6 +188,10 @@ func _disconnect_from_current_actor() -> void:
 func _on_actor_finished(_actor: Actor) -> void:
 	if debug_turns:
 		print("[TurnController] _on_actor_finished() from actor=", _actor_dbg(_actor), " current_actor=", _actor_dbg(current_actor))
+	
+	# Add delay before ending turn to allow damage indicators and other effects to appear
+	await get_tree().create_timer(1.5).timeout
+	
 	end_current_actor_turn()
 
 

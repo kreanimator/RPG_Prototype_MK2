@@ -143,9 +143,9 @@ func spend_action_points(amount: int) -> bool:
 	var prev_ap := action_points
 	var result := super.spend_action_points(amount)
 
-	# Handle out-of-AP only once
+	# Handle out-of-AP only once - defer to allow hit processing to complete first
 	if prev_ap > 0 and action_points <= 0:
-		_handle_out_of_ap()
+		call_deferred("_handle_out_of_ap")
 
 	return result
 

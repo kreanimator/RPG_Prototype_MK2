@@ -154,6 +154,7 @@ func _handle_player_collision(player: Node) -> void:
 			player_model.resources.take_damage(damage)
 		else:
 			print("[Combat] Ranged attack MISSED player!")
+			DamageIndicator.create_at_position(player.global_position, DamageIndicator.IndicatorType.MISS)
 
 ## Handle enemy collision
 func _handle_enemy_collision(enemy: Node) -> void:
@@ -164,6 +165,7 @@ func _handle_enemy_collision(enemy: Node) -> void:
 			enemy.take_damage(damage)
 		else:
 			print("[Combat] Ranged attack MISSED enemy!")
+			DamageIndicator.create_at_position(enemy.global_position, DamageIndicator.IndicatorType.MISS)
 
 ## Handle rigid body collision (for physics objects)
 func _handle_rigid_body_collision(rigid_body: RigidBody3D) -> void:

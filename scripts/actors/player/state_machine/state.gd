@@ -203,6 +203,8 @@ func react_on_hit(hit : HitData):
 		if not hit_result["hit"]:
 			# Attack missed
 			print("[Combat] MISS! Hit chance: %d%%, Roll: %d (need <= %d)" % [hit_result["hit_chance"], hit_result["roll"], hit_result["hit_chance"]])
+			# Show MISS indicator
+			DamageIndicator.create_at_position(player.global_position, DamageIndicator.IndicatorType.MISS)
 			hit.queue_free()
 			return
 		
