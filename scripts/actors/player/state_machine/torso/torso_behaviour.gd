@@ -204,3 +204,15 @@ func _init_behaviour():
 
 func init_behaviour():
 	pass
+
+
+# Default turn target position: straight ahead of the player.
+# Specific behaviours (interact / attack) override this to return
+# the current interactable / enemy position.
+func get_turn_target_position() -> Vector3:
+	if player == null:
+		return Vector3.ZERO
+	# Return a point 1 meter forward from player's current position
+	# In Godot, forward is typically -basis.z
+	var forward_dir := -player.global_transform.basis.z
+	return player.global_position + forward_dir

@@ -12,7 +12,7 @@ var _scene_ref: Node = null
 ## Create a damage indicator at the specified position
 ## type: DAMAGE (red), HEAL (green), MISS (yellow)
 ## value: damage/heal amount (ignored for MISS)
-static func create_at_position(position: Vector3, type: IndicatorType, value: float = 0.0) -> void:
+static func create_at_position(pos: Vector3, type: IndicatorType, value: float = 0.0) -> void:
 	var scene: Node = Engine.get_main_loop().current_scene
 	if scene == null:
 		return
@@ -21,7 +21,7 @@ static func create_at_position(position: Vector3, type: IndicatorType, value: fl
 	var indicator := DamageIndicator.new()
 	scene.add_child(indicator)
 	# Position slightly above the actor (head level)
-	indicator.global_position = position + Vector3(0, 1.5, 0)
+	indicator.global_position = pos + Vector3(0, 1.5, 0)
 	
 	# Store scene reference for label creation
 	indicator._scene_ref = scene
