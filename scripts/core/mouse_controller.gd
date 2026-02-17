@@ -113,8 +113,11 @@ func _handle_world_click(new_input: InputPackage) -> void:
 			var resolver := player.player_model.action_resolver as ActionResolver
 			if resolver:
 				resolver.set_intent(intent)
-
-			player.player_visuals.cursor_manager.show_target_point(result["position"], result["normal"])
+			
+			# Get the snapped navmesh position (final path point) instead of raw click position
+			# This ensures VFX appears on the floor, not on walls/edges
+			var snapped_pos := _get_snapped_navmesh_position(result["position"])
+			player.player_visuals.cursor_manager.show_target_point(snapped_pos, Vector3.UP)
 
 		GameManager.MouseMode.INVESTIGATE:
 			# For now just to move to every object, will changed and refactored later it is not core functionality now
@@ -183,6 +186,11 @@ func _get_current_attack_range() -> float:
 	# TODO: later return equipped weapon range if exists
 	return 1.6
 
+func _get_snapped_navmesh_position(pos: Vector3) -> Vector3:
+	# Snap position to the closest point on the navigation mesh
+	# This ensures the VFX appears on the floor, not on walls or edges
+	var map: RID = player.get_world_3d().navigation_map
+	return NavigationServer3D.map_get_closest_point(map, pos)
 
 func _cycle_mouse_mode() -> void:
 	GameManager.mouse_mode = (int(GameManager.mouse_mode) + 1) % GameManager.MouseMode.keys().size() as GameManager.MouseMode

@@ -22,12 +22,12 @@
   "inventory": [],
   "equipment": {},
   "skills": {
-    "unarmed": 5,
-    "melee_weapons": 5,
-    "small_guns": 5,
-    "big_guns": 5,
-    "energy_weapons": 5,
-    "throwing": 5
+	"unarmed": 45,
+	"melee_weapons": 25,
+	"small_guns": 15,
+	"big_guns": 15,
+	"energy_weapons": 5,
+	"throwing": 5
   },
   "quests": []
 }

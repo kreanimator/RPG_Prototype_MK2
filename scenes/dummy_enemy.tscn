@@ -7,7 +7,7 @@
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_6xh4u"]
 radius = 0.4194336
-height = 1.4672852
+height = 1.4358597
 
 [node name="DummyEnemy" type="CharacterBody3D" unique_id=1554000348]
 collision_layer = 2
@@ -19,7 +19,7 @@ actor_name = "Fucking Mutant"
 faction = 3
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=103787613]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.13185382, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.11614108, 0)
 shape = SubResource("CapsuleShape3D_6xh4u")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=313376946]

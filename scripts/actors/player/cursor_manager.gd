@@ -85,10 +85,20 @@ func _process(_delta: float) -> void:
 	# Continuously update hit chance when hovering over actors in attack mode
 	if GameManager.mouse_mode == GameManager.MouseMode.ATTACK:
 		_update_hit_chance_for_hovered_actor()
+	else:
+		# Hide hit chance label when not in ATTACK mode
+		if _hit_chance_label != null:
+			_hit_chance_label.visible = false
 
 func set_cursor_mode(mode: int) -> void:
 	if mode == _current_mode:
 		return
+	
+	# Hide hit chance label when switching away from ATTACK mode
+	if _current_mode == MODE_ATTACK and mode != MODE_ATTACK:
+		if _hit_chance_label != null:
+			_hit_chance_label.visible = false
+	
 	_current_mode = mode
 	_apply_cursor(mode)
 

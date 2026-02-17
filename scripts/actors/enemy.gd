@@ -22,6 +22,7 @@ class_name DummyEnemy
 
 var _tc_ref: TurnController = null
 var _auto_end_token: int = 0
+var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 func _ready() -> void:
 	super._ready()
@@ -78,3 +79,12 @@ func on_turn_ended(_tc: Node) -> void:
 	_auto_end_token += 1
 	if debug_ai:
 		print("[DummyEnemy] on_turn_ended")
+
+func _physics_process(delta: float) -> void:
+	# Apply gravity to the dummy enemy
+	if not is_on_floor():
+		velocity.y -= gravity * delta
+	else:
+		velocity.y = 0.0
+	
+	move_and_slide()

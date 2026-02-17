@@ -49,10 +49,11 @@ func _start_intent_execution() -> void:
 func _execute_move_intent() -> void:
 	execution_state = ExecutionState.NAVIGATING
 	player.set_target_position(current_intent.target_position)
-	player.player_visuals.cursor_manager.show_target_point(
-		current_intent.target_position,
-		current_intent.target_normal
-	)
+	
+	# Use the snapped navmesh position (final path point) for VFX
+	# This ensures VFX appears on the floor, not on walls/edges
+	var snapped_pos := player.nav_agent.target_position
+	player.player_visuals.cursor_manager.show_target_point(snapped_pos, Vector3.UP)
 
 # -------------------------
 # INTERACT (unchanged)
@@ -117,10 +118,11 @@ func _execute_attack_intent() -> void:
 func _execute_investigate_intent() -> void:
 	execution_state = ExecutionState.NAVIGATING
 	player.set_target_position(current_intent.target_position)
-	player.player_visuals.cursor_manager.show_target_point(
-		current_intent.target_position,
-		current_intent.target_normal
-	)
+	
+	# Use the snapped navmesh position (final path point) for VFX
+	# This ensures VFX appears on the floor, not on walls/edges
+	var snapped_pos := player.nav_agent.target_position
+	player.player_visuals.cursor_manager.show_target_point(snapped_pos, Vector3.UP)
 
 func update(_delta: float) -> void:
 	if not current_intent or execution_state == ExecutionState.IDLE:
