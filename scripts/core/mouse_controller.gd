@@ -14,8 +14,9 @@ var _pending_mouse_pos := Vector2.ZERO
 
 func collect_input() -> InputPackage:
 	var new_input := InputPackage.new()
-		# --- HARD GATE: no player commands during enemy slot ---
-	if GameManager.is_in_combat() and not player.is_player_turn:
+	
+	# --- HARD GATE: no player commands during enemy slot (only in combat) or when can't perform action ---
+	if (GameManager.is_in_combat() and not player.is_player_turn) or not GameManager.can_perform_action:
 		# eat pending clicks so they don't "fire" when your turn starts
 		_pending_left_click = false
 		_pending_right_click = false
@@ -31,17 +32,18 @@ func collect_input() -> InputPackage:
 		new_input.actions.append("idle")
 		return new_input
 	# -------------------------------------------------------
-	# Right click: cycle mouse mode
+	# Right click: cycle mouse mode (only if not busy)
 	if _pending_right_click:
 		_pending_right_click = false
-		_cycle_mouse_mode()
-		player.player_visuals.cursor_manager.set_cursor_mode(GameManager.mouse_mode)
+		if GameManager.mouse_mode != GameManager.MouseMode.BUSY:
+			_cycle_mouse_mode()
+			player.player_visuals.cursor_manager.set_cursor_mode(GameManager.mouse_mode)
 
-	# Left click: act in current mode
+	# Left click: act in current mode (only if not busy)
 	if _pending_left_click:
 		_pending_left_click = false
 
-		if GameManager.can_perform_action:
+		if GameManager.can_perform_action and GameManager.mouse_mode != GameManager.MouseMode.BUSY:
 			match GameManager.mouse_mode:
 				GameManager.MouseMode.INTERACT:
 					_handle_interact_click()
@@ -160,6 +162,10 @@ func _find_actor_from_node(n: Node) -> Actor:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Utils.is_mouse_over_gui():
+		return
+	
+	# Block all input when it's not player's turn (only in combat) or can't perform action
+	if (GameManager.is_in_combat() and not player.is_player_turn) or not GameManager.can_perform_action:
 		return
 
 	if event is InputEventMouseButton and event.pressed:

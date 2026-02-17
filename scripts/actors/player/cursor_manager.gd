@@ -5,6 +5,7 @@ const MODE_MOVE := 0
 const MODE_ATTACK := 1
 const MODE_INVESTIGATE := 2
 const MODE_INTERACT := 3
+const MODE_BUSY := 4
 
 const TARGET_POINT_PREFAB := preload("uid://d2dgudxyt8cox")
 
@@ -12,6 +13,7 @@ const INVESTIGATE_ICON_IMAGE := preload("uid://cqcegply4vpah")
 const DEFAULT_ICON_IMAGE := preload("uid://bicbqbvb43he3")
 const ATTACK_ICON_IMAGE := preload("uid://mle7kd2qms8b")
 const INTERACT_ICON_IMAGE = preload("uid://4oue2xm12exg")
+const BUSY_HOURGLASS_ICON_IMAGE = preload("uid://dcf8kw2xjtx15")
 
 @export var cursor_hotspot: Vector2 = Vector2.ZERO
 @export var cursor_shape: int = Input.CURSOR_ARROW
@@ -19,6 +21,7 @@ const INTERACT_ICON_IMAGE = preload("uid://4oue2xm12exg")
 
 var _cursor_by_mode: Dictionary = {} # int -> Texture2D
 var _current_mode: int = MODE_MOVE
+var _previous_mode: GameManager.MouseMode = GameManager.MouseMode.MOVE # Store mode before BUSY
 
 var _target_point: Node3D = null
 var _hover_actor: Node = null # Visual only (highlight/tooltip later)
@@ -32,7 +35,8 @@ func _ready() -> void:
 		MODE_MOVE: DEFAULT_ICON_IMAGE,
 		MODE_ATTACK: ATTACK_ICON_IMAGE,
 		MODE_INVESTIGATE: INVESTIGATE_ICON_IMAGE,
-		MODE_INTERACT: INTERACT_ICON_IMAGE
+		MODE_INTERACT: INTERACT_ICON_IMAGE,
+		MODE_BUSY: BUSY_HOURGLASS_ICON_IMAGE
 	}
 	_apply_cursor(_current_mode)
 	_create_hit_chance_label()
@@ -75,6 +79,9 @@ func _process(_delta: float) -> void:
 	var mouse_pos := get_viewport().get_mouse_position()
 	_hit_chance_label.position = mouse_pos + Vector2(20, -30)
 	
+	# Check if cursor should be busy (not player turn or can't perform action)
+	_update_busy_cursor()
+	
 	# Continuously update hit chance when hovering over actors in attack mode
 	if GameManager.mouse_mode == GameManager.MouseMode.ATTACK:
 		_update_hit_chance_for_hovered_actor()
@@ -88,6 +95,42 @@ func set_cursor_mode(mode: int) -> void:
 func _apply_cursor(mode: int) -> void:
 	var tex: Texture2D = _cursor_by_mode.get(mode, DEFAULT_ICON_IMAGE)
 	Input.set_custom_mouse_cursor(tex, cursor_shape, cursor_hotspot)
+
+func _is_busy() -> bool:
+	# Check if player can't perform actions
+	if not GameManager.can_perform_action:
+		return true
+	
+	# Only check turn status when in combat
+	if GameManager.is_in_combat():
+		var player := get_tree().get_first_node_in_group("player") as Player
+		if player != null and not player.is_player_turn:
+			return true
+	
+	return false
+
+func _update_busy_cursor() -> void:
+	if _is_busy():
+		# Save current mode before switching to BUSY
+		if GameManager.mouse_mode != GameManager.MouseMode.BUSY:
+			_previous_mode = GameManager.mouse_mode
+			GameManager.mouse_mode = GameManager.MouseMode.BUSY
+		_apply_cursor(MODE_BUSY)
+	else:
+		# Restore previous mode if we were in BUSY mode
+		if GameManager.mouse_mode == GameManager.MouseMode.BUSY:
+			GameManager.mouse_mode = _previous_mode
+			# Update cursor manager's internal mode to match
+			match _previous_mode:
+				GameManager.MouseMode.MOVE:
+					_current_mode = MODE_MOVE
+				GameManager.MouseMode.ATTACK:
+					_current_mode = MODE_ATTACK
+				GameManager.MouseMode.INVESTIGATE:
+					_current_mode = MODE_INVESTIGATE
+				GameManager.MouseMode.INTERACT:
+					_current_mode = MODE_INTERACT
+		_apply_cursor(_current_mode)
 
 # --- Target point (visual marker) ---
 

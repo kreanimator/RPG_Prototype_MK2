@@ -4,7 +4,7 @@ signal game_state_changed(new_state: int, reason: String)
 
 enum GameState { INVESTIGATION, COMBAT }
 enum MoveMode { WALK, RUN, CROUCH }
-enum MouseMode { MOVE, ATTACK, INVESTIGATE, INTERACT }
+enum MouseMode { MOVE, ATTACK, INVESTIGATE, INTERACT, BUSY }
 
 var game_state: GameState = GameState.INVESTIGATION:
 	set(value):
