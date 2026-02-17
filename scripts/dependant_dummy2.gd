@@ -78,8 +78,10 @@ func _animate_to(extend: bool) -> void:
 		_tween = null
 
 	# Collision behavior (only if you have a separate CollisionShape3D)
+	# If collision_only_when_extended is true: disable when NOT extended
+	# If false: always enable collision
 	if collider:
-		collider.disabled = collision_only_when_extended
+		collider.disabled = not extend if collision_only_when_extended else false
 
 	var target_len := extended_length_m if extend else retracted_length_m
 
@@ -142,11 +144,37 @@ func _request_nav_rebake() -> void:
 	_rebake_timer = get_tree().create_timer(rebake_delay_sec)
 	_rebake_timer.timeout.connect(func():
 		_rebake_timer = null
-		if nav_region.has_method("bake_navigation_mesh"):
-			print("Baking new navmesh")
-			nav_region.bake_navigation_mesh()
-		else:
-			push_warning("NavigationRegion3D has no bake_navigation_mesh() in this Godot version.")
+		if not nav_region.has_method("bake_navigation_mesh"):
+			push_warning("NavigationRegion3D has no bake_navigation_mesh() method.")
+			return
+		
+		var nav_mesh := nav_region.navigation_mesh
+		if nav_mesh == null:
+			push_warning("NavigationRegion3D has no navigation_mesh resource.")
+			return
+		
+		# Store original values to preserve them after baking
+		var original_cell_size := nav_mesh.cell_size
+		var original_cell_height := nav_mesh.cell_height
+		var original_agent_radius := nav_mesh.agent_radius
+		var original_agent_max_climb := nav_mesh.agent_max_climb
+		
+		# Ensure correct values are set before baking (must match original navmesh settings)
+		# This prevents floating characters due to mismatched navmesh settings
+		nav_mesh.cell_size = 0.1
+		nav_mesh.cell_height = 0.15
+		nav_mesh.agent_radius = 0.75
+		nav_mesh.agent_max_climb = 0.15
+		
+		print("Baking new navmesh (cell_size=%.2f, cell_height=%.2f, agent_radius=%.2f)" % [nav_mesh.cell_size, nav_mesh.cell_height, nav_mesh.agent_radius])
+		nav_region.bake_navigation_mesh()
+		
+		# Force restore all values after baking (baking process may modify them)
+		# This is critical to prevent character floating and maintain consistency
+		nav_mesh.cell_size = original_cell_size
+		nav_mesh.cell_height = original_cell_height
+		nav_mesh.agent_radius = original_agent_radius
+		nav_mesh.agent_max_climb = original_agent_max_climb
 	)
 
 func _resolve_nav_region() -> NavigationRegion3D:

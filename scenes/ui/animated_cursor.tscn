@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cu78ut84jmx8w"]
+
+[ext_resource type="Script" uid="uid://dv2jfbyc31bfl" path="res://scripts/ui/animated_cursor.gd" id="1_foftf"]
+
+[node name="AnimatedCursor" type="Sprite2D" unique_id=1999569543]
+script = ExtResource("1_foftf")

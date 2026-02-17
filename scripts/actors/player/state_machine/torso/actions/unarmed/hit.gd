@@ -15,6 +15,7 @@ func setup_animator(_input : InputPackage):
 	animation = get_current_animation()
 	if torso_anim_settings.current_animation == "simple": # ie both are simple of AnimatorModifier type
 		simple_torso.play(animation, 0.15)
+		print("Played animation with name ", animation)
 	else:
 		simple_torso.play(animation, 0)
 		torso_anim_settings.play("simple", 0.15)
