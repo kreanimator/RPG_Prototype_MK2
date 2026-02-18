@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dpmvytflfy0qb" path="res://scripts/weapons/pistols/revolver.gd" id="1_ydqbe"]
 [ext_resource type="Script" uid="uid://dsy7t250no1xd" path="res://scripts/actors/player/state_machine/torso/actions/turn.gd" id="2_m70vx"]
+[ext_resource type="PackedScene" uid="uid://p2gqfs5gahmq" path="res://scenes/weapons/bullet.tscn" id="2_wvb0v"]
 [ext_resource type="Script" uid="uid://biv5o2lvkntgp" path="res://scripts/actors/player/state_machine/torso/actions/ranged/aim.gd" id="3_wvb0v"]
 [ext_resource type="Script" uid="uid://go4h702ybe3l" path="res://scripts/actors/player/state_machine/torso/actions/ranged/shoot.gd" id="4_6iuvm"]
 [ext_resource type="Script" uid="uid://2joac531pilo" path="res://scripts/actors/player/state_machine/torso/actions/ranged/reload.gd" id="5_4d2n8"]
@@ -108,8 +109,8 @@ shadow_mesh = SubResource("ArrayMesh_g4chb")
 
 [node name="Revolver" type="Node3D" unique_id=1478870423 node_paths=PackedStringArray("shooting_point")]
 script = ExtResource("1_ydqbe")
+bullet_scene = ExtResource("2_wvb0v")
 shooting_point = NodePath("ShootingPoint")
-fire_mode = 0
 weapon_range = 7.0
 
 [node name="Revolver" type="MeshInstance3D" parent="." unique_id=1998021955]

@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://p2gqfs5gahmq"]
+
+[ext_resource type="Script" uid="uid://ijasws6aoor6" path="res://scripts/weapons/projectiles/bullet.gd" id="1_mx1hr"]
+[ext_resource type="Material" uid="uid://c7xa05uylm4nm" path="res://resources/materials/bullet_material_3d.tres" id="2_dnt7v"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_1t05q"]
+material = ExtResource("2_dnt7v")
+radius = 0.02
+height = 0.16
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_mx1hr"]
+radius = 0.04
+height = 0.2
+
+[node name="Bullet" type="RigidBody3D" unique_id=1242553853]
+script = ExtResource("1_mx1hr")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=700845269]
+mesh = SubResource("CapsuleMesh_1t05q")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=750248929]
+shape = SubResource("CapsuleShape3D_mx1hr")
