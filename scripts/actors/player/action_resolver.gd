@@ -4,7 +4,14 @@ class_name ActionResolver
 signal intent_completed(intent: ActionIntent)
 signal intent_failed(intent: ActionIntent, reason: String)
 
-@export var player: Player
+# Generic actor reference (works for Player, enemies, NPCs, etc.)
+var actor: Actor = null
+# Model reference (PlayerModel or HumanoidModel)
+var model: Node = null  # Can be PlayerModel or HumanoidModel
+# Move mode for navigation
+# For Player: uses GameManager.MoveMode
+# For NPCs/enemies: uses Actor.ActorMoveMode
+var move_mode: int = GameManager.MoveMode.WALK
 
 var current_intent: ActionIntent = null
 var execution_state: ExecutionState = ExecutionState.IDLE
@@ -19,8 +26,40 @@ enum ExecutionState {
 }
 
 func _ready() -> void:
-	if not player:
-		player = get_parent().get_parent() as Player
+	# Auto-detect actor from parent hierarchy
+	if not actor:
+		var parent = get_parent()
+		if parent:
+			# Try to find Actor in parent chain
+			if parent is Actor:
+				actor = parent as Actor
+			elif parent.get_parent() is Actor:
+				actor = parent.get_parent() as Actor
+		
+		# Auto-detect model
+		if actor:
+			# Try PlayerModel first (for Player)
+			if actor is Player:
+				var player = actor as Player
+				model = player.get_node_or_null("PlayerModel")
+			else:
+				# Try HumanoidModel (for enemies/NPCs)
+				# Search all children for HumanoidModel
+				for child in actor.get_children():
+					if child is HumanoidModel:
+						model = child
+						break
+		
+		# Set move mode based on actor type
+		if actor is Player:
+			# Player uses GameManager.move_mode
+			move_mode = GameManager.move_mode
+		else:
+			# NPCs/enemies: read move_mode from their model (uses Actor.ActorMoveMode)
+			if model is HumanoidModel:
+				move_mode = (model as HumanoidModel).move_mode
+			else:
+				move_mode = Actor.ActorMoveMode.WALK
 
 func set_intent(intent: ActionIntent) -> void:
 	if current_intent:
@@ -47,18 +86,26 @@ func _start_intent_execution() -> void:
 			_execute_investigate_intent() # simple "Fallout2 style" move
 
 func _execute_move_intent() -> void:
-	execution_state = ExecutionState.NAVIGATING
-	player.set_target_position(current_intent.target_position)
+	if not actor:
+		return
 	
-	# Use the snapped navmesh position (final path point) for VFX
-	# This ensures VFX appears on the floor, not on walls/edges
-	var snapped_pos := player.nav_agent.target_position
-	player.player_visuals.cursor_manager.show_target_point(snapped_pos, Vector3.UP)
+	execution_state = ExecutionState.NAVIGATING
+	actor.set_target_position(current_intent.target_position)
+	
+	# Player-specific: show target point VFX (optional for NPCs)
+	if actor is Player:
+		var player = actor as Player
+		if player.player_visuals and player.player_visuals.cursor_manager:
+			var snapped_pos := actor.nav_agent.target_position
+			player.player_visuals.cursor_manager.show_target_point(snapped_pos, Vector3.UP)
 
 # -------------------------
 # INTERACT (unchanged)
 # -------------------------
 func _execute_interact_intent() -> void:
+	if not actor:
+		return
+	
 	var interactable = current_intent.target_object as Interactable
 
 	if not interactable or not is_instance_valid(interactable):
@@ -66,11 +113,11 @@ func _execute_interact_intent() -> void:
 		_clear_intent()
 		return
 
-	# Store the target interactable on the player
-	player.current_interactable = interactable
+	# Store the target interactable on the actor
+	actor.current_interactable = interactable
 
 	# Check distance to interactable
-	var distance = player.global_position.distance_to(interactable.global_position)
+	var distance = actor.global_position.distance_to(interactable.global_position)
 	if distance <= interactable.interaction_zone_size:
 		# Already in range, go directly to executing
 		execution_state = ExecutionState.EXECUTING_ACTION
@@ -78,12 +125,15 @@ func _execute_interact_intent() -> void:
 
 	# Need to navigate closer
 	execution_state = ExecutionState.NAVIGATING
-	player.set_target_position(current_intent.target_position)
+	actor.set_target_position(current_intent.target_position)
 
 # -------------------------
 # ATTACK (fixed: move into range, then attack; never "out of range" fail)
 # -------------------------
 func _execute_attack_intent() -> void:
+	if not actor:
+		return
+	
 	var enemy := current_intent.target_object as Actor
 
 	if not enemy or not is_instance_valid(enemy):
@@ -101,7 +151,7 @@ func _execute_attack_intent() -> void:
 	if desired_range <= 0.0:
 		desired_range = 2.0
 
-	var distance := player.global_position.distance_to(enemy.global_position)
+	var distance := actor.global_position.distance_to(enemy.global_position)
 
 	if distance <= desired_range:
 		# Already in range -> execute attack
@@ -110,19 +160,24 @@ func _execute_attack_intent() -> void:
 
 	# Out of range -> navigate closer (same "move then act" style as interact)
 	execution_state = ExecutionState.NAVIGATING
-	player.set_target_position(enemy.global_position)
+	actor.set_target_position(enemy.global_position)
 
 # -------------------------
 # INVESTIGATE (simple: move to clicked position; like Fallout 2 "research")
 # -------------------------
 func _execute_investigate_intent() -> void:
-	execution_state = ExecutionState.NAVIGATING
-	player.set_target_position(current_intent.target_position)
+	if not actor:
+		return
 	
-	# Use the snapped navmesh position (final path point) for VFX
-	# This ensures VFX appears on the floor, not on walls/edges
-	var snapped_pos := player.nav_agent.target_position
-	player.player_visuals.cursor_manager.show_target_point(snapped_pos, Vector3.UP)
+	execution_state = ExecutionState.NAVIGATING
+	actor.set_target_position(current_intent.target_position)
+	
+	# Player-specific: show target point VFX (optional for NPCs)
+	if actor is Player:
+		var player = actor as Player
+		if player.player_visuals and player.player_visuals.cursor_manager:
+			var snapped_pos := actor.nav_agent.target_position
+			player.player_visuals.cursor_manager.show_target_point(snapped_pos, Vector3.UP)
 
 func update(_delta: float) -> void:
 	if not current_intent or execution_state == ExecutionState.IDLE:
@@ -135,11 +190,14 @@ func update(_delta: float) -> void:
 			_monitor_behavior_completion()
 
 func _update_navigation() -> void:
+	if not actor:
+		return
+	
 	# Keep the EXACT interact logic (unchanged)
 	if current_intent.intent_type == ActionIntent.IntentType.INTERACT:
 		var interactable = current_intent.target_object as Interactable
 		if interactable and is_instance_valid(interactable):
-			var distance = player.global_position.distance_to(interactable.global_position)
+			var distance = actor.global_position.distance_to(interactable.global_position)
 			if distance <= interactable.interaction_zone_size:
 				execution_state = ExecutionState.EXECUTING_ACTION
 				return
@@ -156,21 +214,24 @@ func _update_navigation() -> void:
 		if desired_range <= 0.0:
 			desired_range = 2.0
 
-		var distance := player.global_position.distance_to(enemy.global_position)
+		var distance := actor.global_position.distance_to(enemy.global_position)
 		if distance <= desired_range:
 			# Close enough to attack
 			execution_state = ExecutionState.EXECUTING_ACTION
 			return
 
 		# Enemy moved? keep chasing
-		player.set_target_position(enemy.global_position)
+		actor.set_target_position(enemy.global_position)
 		return
 
 	# For MOVE / INVESTIGATE: wait for navigation finished
-	if player.nav_agent.is_navigation_finished():
+	if actor.nav_agent and actor.nav_agent.is_navigation_finished():
 		execution_state = ExecutionState.EXECUTING_ACTION
 
 func _monitor_behavior_completion() -> void:
+	if not model:
+		return
+	
 	if not _action_triggered:
 		_action_triggered = true
 		if current_intent.intent_type == ActionIntent.IntentType.INTERACT:
@@ -183,9 +244,12 @@ func _monitor_behavior_completion() -> void:
 			_last_behavior = current_intent.action_name
 	else:
 		# Check if behavior has completed
-		var current_behavior = player.player_model.torso_machine.current_behaviour.behaviour_name
-		if current_behavior != _last_behavior:
-			_complete_intent()
+		# Works for both PlayerModel and HumanoidModel (both have torso_machine)
+		var torso_machine = model.get("torso_machine")
+		if torso_machine and torso_machine.current_behaviour:
+			var current_behavior = torso_machine.current_behaviour.behaviour_name
+			if current_behavior != _last_behavior:
+				_complete_intent()
 
 func _complete_intent() -> void:
 	intent_completed.emit(current_intent)
@@ -211,12 +275,24 @@ func get_current_action_for_input() -> String:
 
 	match execution_state:
 		ExecutionState.NAVIGATING:
-			match GameManager.move_mode:
-				GameManager.MoveMode.WALK:
+			# Use move_mode (set based on actor type)
+			# For Player, read directly from GameManager.move_mode (always up-to-date)
+			# For NPCs/enemies, read from their model's move_mode (can be changed dynamically)
+			var current_move_mode = move_mode
+			if actor is Player:
+				current_move_mode = GameManager.move_mode
+			elif model is HumanoidModel:
+				# Read from model's move_mode (allows AI to change it dynamically)
+				current_move_mode = (model as HumanoidModel).move_mode
+			
+			# Both GameManager.MoveMode and Actor.ActorMoveMode have the same integer values
+			# (WALK=0, RUN=1, CROUCH=2), so we can match against the integer directly
+			match current_move_mode:
+				GameManager.MoveMode.WALK, Actor.ActorMoveMode.WALK:
 					return "walk"
-				GameManager.MoveMode.RUN:
+				GameManager.MoveMode.RUN, Actor.ActorMoveMode.RUN:
 					return "run"
-				GameManager.MoveMode.CROUCH:
+				GameManager.MoveMode.CROUCH, Actor.ActorMoveMode.CROUCH:
 					return "crouch"
 
 		ExecutionState.EXECUTING_ACTION:
@@ -238,6 +314,32 @@ func get_current_action_for_input() -> String:
 					return current_intent.action_name
 
 	return ""
+
+func set_actor(_actor: Actor) -> void:
+	"""Set the actor reference (can be called manually if auto-detection fails)"""
+	actor = _actor
+	
+	# Auto-detect model based on actor type
+	if actor is Player:
+		var player = actor as Player
+		model = player.get_node_or_null("PlayerModel")
+		# Update move_mode from GameManager for player
+		move_mode = GameManager.move_mode
+	else:
+		# For enemies/NPCs, find HumanoidModel
+		for child in actor.get_children():
+			if child is HumanoidModel:
+				model = child
+				break
+		# NPCs/enemies: read move_mode from their model (uses Actor.ActorMoveMode)
+		if model is HumanoidModel:
+			move_mode = (model as HumanoidModel).move_mode
+		else:
+			move_mode = Actor.ActorMoveMode.WALK
+
+func set_model(_model: Node) -> void:
+	"""Set the model reference directly (PlayerModel or HumanoidModel)"""
+	model = _model
 
 
 func cancel_intent() -> void:

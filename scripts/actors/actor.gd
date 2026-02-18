@@ -5,6 +5,14 @@ class_name Actor
 # TurnController listens to this to advance to the next actor.
 signal turn_finished(actor: Actor)
 
+# Movement mode enum for actors (NPCs, enemies, etc.)
+# Note: Player uses GameManager.MoveMode instead
+enum ActorMoveMode {
+	WALK,
+	RUN,
+	CROUCH
+}
+
 @export var actor_name: String = "Undefined"
 @export var is_combatant: bool = true
 

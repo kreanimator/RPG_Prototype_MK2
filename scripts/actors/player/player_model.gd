@@ -38,6 +38,10 @@ func _ready() -> void:
 
 	player_aim.player = player
 
+	# Initialize ActionResolver with actor and model references
+	if action_resolver:
+		action_resolver.set_actor(player)
+		action_resolver.set_model(self)
 
 	current_behaviour = torso_machine.default_behaviour
 	torso_machine.current_behaviour = current_behaviour

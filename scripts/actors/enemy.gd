@@ -18,7 +18,7 @@ class_name DummyEnemy
 @export var debug_max_action_points: int = 10
 @export var debug_armor: int = 0
 
-@onready var resources: EnemyResources = $Resources
+@onready var resources: ActorResources = $Resources
 
 var _tc_ref: TurnController = null
 var _auto_end_token: int = 0
@@ -28,9 +28,10 @@ func _ready() -> void:
 	super._ready()
 	
 	# Initialize resources with full debug stats
+	# Using generic ActorResources for all humanoids (enemies, NPCs, etc.)
 	if resources:
 		resources.set_actor(self)
-		resources.initialize_enemy_stats(
+		resources.initialize_humanoid_stats(
 			debug_strength,
 			debug_perception,
 			debug_endurance,
