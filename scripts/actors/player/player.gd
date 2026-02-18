@@ -57,6 +57,9 @@ func setup_inventory() -> void:
 	equipment_manager.weapon_equipped.connect(_on_weapon_equipped)
 	equipment_manager.weapon_unequipped.connect(_on_weapon_unequipped)
 	equipment_manager.active_slot_changed.connect(_on_active_slot_changed)
+	
+	# Initialize attack actions based on current weapon (deferred to ensure everything is ready)
+	call_deferred("_initialize_attack_actions")
 
 
 func setup_visuals() -> void:
@@ -144,9 +147,10 @@ func _dbg_nav(prefix: String) -> void:
 func _on_equipment_changed() -> void:
 	equipment_manager._switch_to_slot(equipment_manager.current_active_slot)
 
-func _on_weapon_equipped(slot: String, _weapon: Weapon) -> void:
+func _on_weapon_equipped(slot: String, weapon: Weapon) -> void:
 	if slot == equipment_manager.current_active_slot:
 		equipment_manager._switch_to_slot(slot)
+		_update_attack_actions(weapon)
 
 func _on_weapon_unequipped(slot: String) -> void:
 	if slot == equipment_manager.current_active_slot:
@@ -155,9 +159,45 @@ func _on_weapon_unequipped(slot: String) -> void:
 			equipment_manager.switch_weapon_slot(other_slot)
 		else:
 			equipment_manager._switch_to_slot(slot)
+			_update_attack_actions(null)
 
 func _on_active_slot_changed(slot: String) -> void:
 	equipment_manager._switch_to_slot(slot)
+	# Update attack actions based on new active weapon
+	var active_weapon = player_model.active_weapon
+	_update_attack_actions(active_weapon)
+
+func _initialize_attack_actions() -> void:
+	"""Initialize attack actions based on current weapon (called on startup)"""
+	var active_weapon = player_model.active_weapon
+	_update_attack_actions(active_weapon)
+
+func _update_attack_actions(weapon: Weapon) -> void:
+	"""Update attack behavior actions based on equipped weapon"""
+	var attack_behaviour = player_model.torso_machine.get_behaviour_by_name("attack")
+	if not attack_behaviour:
+		return
+	
+	# Get weapon scene path if weapon exists
+	if weapon != null and is_instance_valid(weapon):
+		# Find the item instance for this weapon
+		var weapon_slot = equipment_manager.current_active_slot
+		var item_instance = equipment_manager.equipment.get(weapon_slot, null)
+		
+		if item_instance != null:
+			var items_db = GameManager.get_items_catalog()
+			var item_base = items_db.get(item_instance.catalog_id, {})
+			var weapon_scene_path = item_base.get("weapon_scene", "")
+			
+			if not weapon_scene_path.is_empty():
+				attack_behaviour.swap_to_weapon_actions(weapon_scene_path)
+				return
+		
+		# No weapon scene found, use unarmed
+		attack_behaviour.swap_to_unarmed_actions()
+	else:
+		# No weapon, use unarmed
+		attack_behaviour.swap_to_unarmed_actions()
 
 
 # -------------------------

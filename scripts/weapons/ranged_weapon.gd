@@ -2,9 +2,8 @@ extends Weapon
 class_name RangedWeapon
 
 enum FireMode {
-	SINGLE,    # One shot per press
-	BURST,     # Fixed number of shots, then stops
-	AUTO       # Continuous while held
+	SINGLE,    # One shot per press (turn-based)
+	BURST      # Fixed number of shots per attack (turn-based)
 }
 
 enum RangedSubtype {
@@ -32,8 +31,8 @@ var current_spread: float = 0.5  # Current spread amount
 var last_spread_update_time: float = 0.0  # Time of last spread update
 var spread_cooldown: float = 1.0  # Time before spread resets to base
 
-# Automatic weapon randomization (for natural bullet ejection effect)
-var barrel_randomization_enabled: bool = false  # Enable for automatic weapons
+# Barrel randomization (for natural bullet ejection visual effect)
+var barrel_randomization_enabled: bool = false  # Enable for certain weapon subtypes (e.g., AUTO_RIFLE)
 var barrel_position_randomness: float = 0.02  # Random offset from barrel position (in meters)
 var barrel_timing_randomness: float = 0.01  # Random timing variation (in seconds)
 var barrel_speed_randomness: float = 0.05  # Random speed variation (as multiplier, e.g., 0.05 = ±5%)
@@ -41,11 +40,12 @@ var barrel_speed_randomness: float = 0.05  # Random speed variation (as multipli
 # Ranged weapon properties (scene-specific, can be set in editor)
 @export_group("Ranged Weapon")
 @export var bullet_scene : PackedScene  # Scene for bullet/projectile
-@export var shooting_point : Node3D  # Node3D child that represents where bullets spawn
+@export var shooting_point : Marker3D  # Node3D child that represents where bullets spawn
 @export var bullet_speed : float = 30.0
 
 @export_group("Fire Mode")
-@export var fire_mode: FireMode = FireMode.AUTO
+@export var fire_mode: FireMode = FireMode.SINGLE  # Current active fire mode
+var available_fire_modes: Array = [FireMode.SINGLE]  # List of available modes (loaded from item data)
 var burst_size: int = 3  # For burst mode - number of shots per burst (loaded from item data)
 var burst_delay: float = 0.1  # Time between bullets in a burst (loaded from item data)
 @export var burst_cooldown: float = 0.5  # Time after burst before can shoot again
@@ -133,25 +133,51 @@ func initialize_from_item_data(item_base: Dictionary) -> void:
 		spread_increase_rate = float(spread_data.get("increase_rate", 0.15))
 		current_spread = base_spread  # Initialize to base spread
 	
-	# Load fire mode and burst settings
-	var fire_mode_str = str(weapon_data.get("fire_mode", "AUTO")).to_upper()
-	match fire_mode_str:
-		"SINGLE":
-			fire_mode = FireMode.SINGLE
-		"BURST":
-			fire_mode = FireMode.BURST
-		"AUTO":
-			fire_mode = FireMode.AUTO
-		_:
-			fire_mode = FireMode.AUTO
+	# Load fire modes (list of available modes)
+	available_fire_modes.clear()
+	var fire_modes_data = weapon_data.get("fire_modes", null)
 	
-	# Load burst settings
-	if fire_mode == FireMode.BURST:
+	if fire_modes_data is Array:
+		# New format: list of available modes
+		for mode_str in fire_modes_data:
+			var mode_upper = str(mode_str).to_upper()
+			match mode_upper:
+				"SINGLE":
+					if FireMode.SINGLE not in available_fire_modes:
+						available_fire_modes.append(FireMode.SINGLE)
+				"BURST":
+					if FireMode.BURST not in available_fire_modes:
+						available_fire_modes.append(FireMode.BURST)
+		
+		# Set current fire mode to first available (or default to SINGLE)
+		if available_fire_modes.size() > 0:
+			fire_mode = available_fire_modes[0]
+		else:
+			fire_mode = FireMode.SINGLE
+			available_fire_modes.append(FireMode.SINGLE)
+	else:
+		# Legacy format: single fire_mode string (backwards compatibility)
+		var fire_mode_str = str(weapon_data.get("fire_mode", "SINGLE")).to_upper()
+		match fire_mode_str:
+			"SINGLE":
+				fire_mode = FireMode.SINGLE
+				available_fire_modes = [FireMode.SINGLE]
+			"BURST":
+				fire_mode = FireMode.BURST
+				available_fire_modes = [FireMode.BURST]
+			_:
+				# Default to SINGLE for turn-based combat
+				fire_mode = FireMode.SINGLE
+				available_fire_modes = [FireMode.SINGLE]
+	
+	# Load burst settings (needed if BURST mode is available)
+	if FireMode.BURST in available_fire_modes:
 		burst_size = int(weapon_data.get("burst_size", 3))
 		burst_delay = float(weapon_data.get("burst_delay", 0.1))
 	
-	# Enable barrel randomization for automatic weapons (AUTO fire mode or AUTO_RIFLE subtype)
-	barrel_randomization_enabled = (fire_mode == FireMode.AUTO) or (ranged_subtype == RangedSubtype.AUTO_RIFLE)
+	# Enable barrel randomization for automatic weapon subtypes (for visual effect)
+	# Note: AUTO_RIFLE subtype can still use SINGLE or BURST mode in turn-based
+	barrel_randomization_enabled = (ranged_subtype == RangedSubtype.AUTO_RIFLE)
 
 ## Set up ammo system with ItemInstance and InventoryManager
 func setup_ammo_system(_item_instance: ItemInstance, _inventory_manager: InventoryManager) -> void:
@@ -197,7 +223,7 @@ func shoot(target_direction: Vector3, target_position: Vector3 = Vector3.ZERO) -
 			_fire_single_bullet(target_direction, target_position)
 			return true
 	
-	# Single shot or auto mode - fire one bullet
+	# Single shot mode - fire one bullet
 	_fire_single_bullet(target_direction, target_position)
 	return true
 
@@ -243,7 +269,7 @@ func _fire_single_bullet(target_direction: Vector3, target_position: Vector3) ->
 	var shoot_position: Vector3 = shooting_point.global_position if shooting_point else global_position
 	var base_direction: Vector3 = (target_position - shoot_position).normalized() if target_position != Vector3.ZERO else target_direction.normalized()
 	
-	# Apply automatic weapon randomization (position, speed) for natural effect
+	# Apply barrel randomization (position, speed) for natural visual effect
 	var final_bullet_speed: float = bullet_speed
 	if barrel_randomization_enabled:
 		# Add random position offset (simulates bullets not perfectly aligned in barrel)
@@ -376,18 +402,29 @@ func get_ammo_percentage() -> float:
 	
 	return float(current_ammo) / float(magazine_size)
 
-# FIXME: Aim line disabled - not pointing correctly to target, needs to be fixed later
-func toggle_aim_line(_value: bool) -> void:
-	"""Toggle aim line visibility. Override in subclasses to implement."""
-	# Always keep aim line off until fixed
-	pass
-
 func reset_burst() -> void:
 	"""Reset burst state (called when button is released or action ends)"""
 	if fire_mode == FireMode.BURST and shots_in_current_burst > 0:
 		# Record when burst ended if we had shots in progress
 		last_burst_end_time = Time.get_unix_time_from_system()
 	shots_in_current_burst = 0
+
+func switch_fire_mode(mode: FireMode) -> bool:
+	"""Switch to a different fire mode. Returns true if successful."""
+	if mode in available_fire_modes:
+		fire_mode = mode
+		# Reset burst state when switching modes
+		reset_burst()
+		return true
+	return false
+
+func get_available_fire_modes() -> Array:
+	"""Get list of available fire modes for this weapon."""
+	return available_fire_modes.duplicate()
+
+func has_fire_mode(mode: FireMode) -> bool:
+	"""Check if weapon supports a specific fire mode."""
+	return mode in available_fire_modes
 
 ## Consume ammo from inventory
 ## Returns the amount of ammo actually consumed

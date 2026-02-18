@@ -40,8 +40,6 @@ func contextualize(new_input : InputPackage) -> InputPackage:
 		# Sync with player aim system
 		if model.player_aim:
 			model.player_aim.is_precise_aim = false
-		if active_weapon is RangedWeapon:
-			active_weapon.toggle_aim_line(false)
 	
 	if new_input.actions.has("toggle_aim_mode") and active_weapon != null and active_weapon is RangedWeapon:
 		if not aim_mode_on:
@@ -59,10 +57,6 @@ func contextualize(new_input : InputPackage) -> InputPackage:
 			if model.player_aim:
 				model.player_aim.is_precise_aim = false
 		
-		# Update aim line visibility based on precise aim state
-		# FIXME: Aim line disabled - not pointing correctly to target, needs to be fixed later
-		if active_weapon is RangedWeapon:
-			active_weapon.toggle_aim_line(false)  # Always false until fixed
 	
 	# Handle precise aim toggle separately (only when already aiming)
 	if new_input.aim_actions.has("toggle_precise_aim_mode") and aim_mode_on and active_weapon != null and active_weapon is RangedWeapon:
@@ -70,9 +64,6 @@ func contextualize(new_input : InputPackage) -> InputPackage:
 		# Sync with player aim system
 		if model.player_aim:
 			model.player_aim.is_precise_aim = is_precise_aim
-		# Update aim line visibility
-		# FIXME: Aim line disabled - not pointing correctly to target, needs to be fixed later
-		active_weapon.toggle_aim_line(false)  # Always false until fixed
 	
 	if aim_mode_on:
 		new_input.behaviour_names.append("aim")
