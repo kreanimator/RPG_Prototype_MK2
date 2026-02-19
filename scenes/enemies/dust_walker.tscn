@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://5lcm6th45kk8" path="res://scenes/enemies/DustWalker/dust_walker_model.tscn" id="2_4mjbg"]
 [ext_resource type="PackedScene" uid="uid://dtuiyp383fp3c" path="res://scenes/enemies/DustWalker/dust_walker_visuals.tscn" id="3_4mjbg"]
 [ext_resource type="PackedScene" uid="uid://bukpe1wm5nsne" path="res://scenes/faction_component.tscn" id="4_4mjbg"]
+[ext_resource type="Script" uid="uid://cakd6f75boc6w" path="res://scripts/actors/ai_input_collector.gd" id="5_o85wn"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_xdkhf"]
 radius = 0.38378906
@@ -13,6 +14,7 @@ height = 1.7531738
 collision_layer = 2
 collision_mask = 15
 script = ExtResource("1_q8aky")
+actor_name = "Dust Walker"
 
 [node name="DustWalkerModel" parent="." unique_id=93527990 instance=ExtResource("2_4mjbg")]
 
@@ -34,3 +36,6 @@ debug_path_custom_color = Color(1, 0.07058824, 0.019607844, 1)
 
 [node name="FactionComponent" parent="." unique_id=1729141699 instance=ExtResource("4_4mjbg")]
 faction = 3
+
+[node name="AIInputCollector" type="Node" parent="." unique_id=1678514202]
+script = ExtResource("5_o85wn")

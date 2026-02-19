@@ -216,22 +216,32 @@ func _notify_ap_changed() -> void:
 # Health System
 # -------------------------
 func take_damage(amount: float) -> void:
-	if is_invincible or amount <= 0.0:
+	if is_invincible:
+		print("[ActorResources] Damage blocked: actor is invincible")
+		return
+	if amount <= 0.0:
+		print("[ActorResources] Damage blocked: amount is %.1f (<= 0)" % amount)
 		return
 	
 	# Apply armor reduction
 	var damage_after_armor := _apply_armor_reduction(amount)
 	if damage_after_armor <= 0.0:
+		print("[ActorResources] Damage blocked by armor: %.1f -> %.1f" % [amount, damage_after_armor])
 		return
 	
 	var prev_health := health
 	health = max(0.0, health - damage_after_armor)
 	
+	print("[ActorResources] take_damage: %.1f -> %.1f (after armor), health: %.1f -> %.1f" % [amount, damage_after_armor, prev_health, health])
+	
 	if health != prev_health:
+		print("[ActorResources] Emitting health_changed signal: %.1f/%.1f" % [health, max_health])
 		health_changed.emit(health, max_health)
 		# Show damage indicator
 		if actor != null:
 			DamageIndicator.create_at_position(actor.global_position, DamageIndicator.IndicatorType.DAMAGE, damage_after_armor)
+	else:
+		print("[ActorResources] Health unchanged, signal NOT emitted")
 	
 	if health <= 0.0 and prev_health > 0.0:
 		_on_death()

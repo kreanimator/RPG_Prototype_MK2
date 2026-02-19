@@ -95,7 +95,11 @@ func _process_unarmed_hit() -> void:
 	# Attack hit - apply damage
 	var target_resources := CombatCalculator.get_actor_resources(target)
 	if target_resources != null:
+		print("[Combat] Applying %.1f damage to %s (current health: %.1f/%.1f)" % [damage, target.actor_name, target_resources.health, target_resources.max_health])
 		target_resources.take_damage(damage)
+		print("[Combat] After damage, health: %.1f/%.1f" % [target_resources.health, target_resources.max_health])
+	else:
+		print("[Combat] ERROR: Could not get resources for target %s" % target.actor_name)
 
 func get_current_animation() -> String:
 	var stats := player.player_model.stats_manager as StatsManager

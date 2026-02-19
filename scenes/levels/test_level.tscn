@@ -5,7 +5,6 @@
 [ext_resource type="Material" uid="uid://byyqusw3pol8q" path="res://resources/materials/test_obstacle.tres" id="3_fr1um"]
 [ext_resource type="PackedScene" uid="uid://cpayioc2prtug" path="res://scenes/dummy_interactable.tscn" id="6_6xh4u"]
 [ext_resource type="Script" uid="uid://1bnpi0rs50co" path="res://scripts/dummy_interactable.gd" id="7_7x1jh"]
-[ext_resource type="PackedScene" uid="uid://bksrxhfdvt02a" path="res://scenes/dummy_enemy.tscn" id="7_hfwtw"]
 [ext_resource type="PackedScene" uid="uid://dgy0co378g748" path="res://scenes/enemies/dust_walker.tscn" id="8_2mu0v"]
 [ext_resource type="PackedScene" uid="uid://cq1gygqlwqh4w" path="res://scenes/interactable.tscn" id="8_hfwtw"]
 [ext_resource type="Script" uid="uid://c7owhibtq16h4" path="res://scripts/dependant_dummy.gd" id="9_hfwtw"]
@@ -268,11 +267,8 @@ size = Vector3(3, 0.5, 4)
 
 [node name="Actors" type="Node" parent="." unique_id=1924778211]
 
-[node name="DummyEnemy" parent="Actors" unique_id=1554000348 instance=ExtResource("7_hfwtw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.414871, 3.1299257, 14.145405)
-
 [node name="DustWalker" parent="Actors" unique_id=1171000512 instance=ExtResource("8_2mu0v")]
-transform = Transform3D(0.48578632, 0, -0.8740776, 0, 1, 0, 0.8740776, 0, 0.48578632, -15.610354, 0, 13.929278)
+transform = Transform3D(-0.99905205, 0, 0.043532144, 0, 1, 0, -0.043532144, 0, -0.99905205, -4.0229006, 9.252371, 14.025441)
 
 [node name="Interactables" type="Node" parent="." unique_id=786977157]
 

@@ -14,7 +14,8 @@ class_name TorsoBehaviourNPC
 		"crouch" : "crouch",
 		"crouch_idle": "crouch_idle",
 		"interact": "interact",
-		"attack": "attack"
+		"attack": "attack",
+		"hit": "hit"
 	}
 @export var interrupted_by_fall : bool = true
 @export var maps_with_stance : bool = false
@@ -27,6 +28,7 @@ var has_forced_move : bool = false
 var forced_move : String
 
 var animations_source : AnimationPlayer
+var animation_duration: float
 var torso_anim_settings : AnimationPlayer
 var simple_torso : AnimatorModifier
 var locomotion_torso : Locomotion
@@ -216,4 +218,3 @@ func get_turn_target_position() -> Vector3:
 	# In Godot, forward is typically -basis.z
 	var forward_dir := -actor.global_transform.basis.z
 	return actor.global_position + forward_dir
-

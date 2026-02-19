@@ -18,6 +18,7 @@ class_name DustWalker
 @onready var dust_walker_model: HumanoidModel = $DustWalkerModel
 @onready var enemy_visuals: HumanoidVisuals = $DustWalkerVisuals
 @onready var resources: ActorResources = $DustWalkerModel/Resources
+@onready var ai_input: AIInputCollector = $AIInputCollector
 
 func _ready() -> void:
 	super._ready()
@@ -39,7 +40,6 @@ func _ready() -> void:
 			dust_walker_max_action_points,
 			dust_walker_armor
 		)
-	
 	setup_visuals()
 	#setup_model()
 	setup_inventory()
@@ -47,14 +47,10 @@ func _ready() -> void:
 	faction_component.faction = faction_component.Faction.MUTANTS
 
 func _physics_process(delta: float) -> void:
-	# Update model with AI input (similar to player's _physics_process)
-	if dust_walker_model:
-		# Create AI input package for this frame
-		# TODO: Replace with actual AI input collection
-		var ai_input := AIInputPackage.new()
-		ai_input.actions.append("idle")  # Default to idle for now
-		dust_walker_model.update(ai_input, delta)
-		ai_input.queue_free()
+	var input := ai_input.collect_input()
+	dust_walker_model.update(input, delta)
+	input.queue_free()
+	_push_rigid_bodies()
 
 func setup_visuals() -> void:
 	if enemy_visuals and dust_walker_model:
@@ -70,3 +66,19 @@ func setup_inventory() -> void:
 	# For now, enemies don't have inventory/equipment managers
 	# This can be added later if needed
 	pass
+
+func _push_rigid_bodies() -> void:
+	# Push rigid bodies when colliding (similar to player)
+	for i in get_slide_collision_count():
+		var c := get_slide_collision(i)
+		if c.get_collider() is RigidBody3D:
+			var rigid_body: RigidBody3D = c.get_collider()
+			var knockback_dir := (rigid_body.global_position - global_position).normalized()
+			knockback_dir.y = 0
+			
+			var actor_mass := 60.0  # Default mass for actors
+			var mass_ratio = clamp(actor_mass / rigid_body.mass, 0.1, 1.0)
+			var knockback_force = 2.0 * mass_ratio
+			
+			if rigid_body.mass < actor_mass * 3.0:
+				rigid_body.apply_impulse(knockback_dir * knockback_force, Vector3.ZERO)

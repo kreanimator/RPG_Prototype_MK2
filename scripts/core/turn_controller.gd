@@ -218,7 +218,7 @@ func _get_actor_resources(actor: Actor) -> ActorResources:
 		var player := actor as Player
 		return player.player_model.resources
 	else:
-		return actor.get_node("Resources") as ActorResources
+		return actor.humanoid_model.resources as ActorResources
 
 
 func _get_actor_sequence(actor: Actor) -> int:
