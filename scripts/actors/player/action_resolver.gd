@@ -141,9 +141,6 @@ func _execute_attack_intent() -> void:
 		_clear_intent()
 		return
 
-	# Cache enemy position into intent (so navigation has something even if enemy ref changes)
-	current_intent.target_position = enemy.global_position
-
 	# Decide desired melee/ranged approach distance
 	# - if weapon_range provided: use it (melee should pass 1.6 etc)
 	# - else fallback to 2.0 (your old default)
@@ -158,9 +155,17 @@ func _execute_attack_intent() -> void:
 		execution_state = ExecutionState.EXECUTING_ACTION
 		return
 
-	# Out of range -> navigate closer (same "move then act" style as interact)
+	# Out of range -> navigate to a position at weapon_range distance from enemy
+	# Calculate direction from enemy to actor, then position at desired_range distance
+	var direction_to_actor := (actor.global_position - enemy.global_position).normalized()
+	var approach_position := enemy.global_position + direction_to_actor * desired_range
+	
+	# Cache the approach position (not enemy position) for navigation
+	current_intent.target_position = approach_position
+	
+	# Navigate to approach position
 	execution_state = ExecutionState.NAVIGATING
-	actor.set_target_position(enemy.global_position)
+	actor.set_target_position(approach_position)
 
 # -------------------------
 # INVESTIGATE (simple: move to clicked position; like Fallout 2 "research")

@@ -195,6 +195,18 @@ func can_afford_action(ap_cost: int) -> bool:
 	return action_points >= ap_cost
 
 
+func can_be_paid_behaviour(behaviour: Node) -> bool:
+	"""Check if we can afford the AP cost of a behaviour.
+	Works with both TorsoBehaviour (player) and TorsoBehaviourNPC (NPCs)."""
+	if behaviour == null:
+		return false
+	# Get AP cost from behaviour (both player and NPC behaviours have ap_cost)
+	var ap_cost = behaviour.get("ap_cost")
+	if ap_cost == null:
+		return true  # No AP cost means it's always affordable
+	return can_afford_action(ap_cost as int)
+
+
 # Helper to emit AP changed signal only when needed
 func _notify_ap_changed() -> void:
 	action_points_changed.emit(action_points, max_action_points)

@@ -5,8 +5,8 @@ class_name HumanoidModel
 
 @onready var combat: HumanoidCombat = $Combat
 @onready var skeleton: Skeleton3D = %GeneralSkeleton
-@onready var torso_machine: TorsoMachine = $Torso
-@onready var legs_machine: LegsMachine = $Legs
+@onready var torso_machine: TorsoMachineNPC = $Torso
+@onready var legs_machine: LegsMachineNPC = $Legs
 @onready var area_awareness: AreaAwareness = $AreaAwareness
 @onready var resources: ActorResources = $Resources
 @onready var action_resolver: ActionResolver = $ActionResolver
@@ -19,7 +19,7 @@ class_name HumanoidModel
 var actor: Actor
 var inventory_manager: InventoryManager
 var equipment_manager: EquipmentManager
-var current_behaviour: TorsoBehaviour
+var current_behaviour: TorsoBehaviourNPC
 
 # Move mode for this humanoid (can be changed dynamically by AI)
 # Uses Actor.ActorMoveMode enum (not GameManager.MoveMode which is player-specific)
@@ -40,43 +40,24 @@ func _ready() -> void:
 		# Fallback: add property directly if method doesn't exist
 		actor.set_meta("humanoid_model", self)
 
-	# Wire references
-	# NOTE: State machines (LegsMachine, TorsoBehaviour) currently expect Player type
-	# This is a limitation that may need refactoring in the future.
-	# For now, we'll work around it by ensuring actor has the necessary properties.
+	# Wire references for NPC state machines
 	if legs_machine:
-		# LegsMachine expects Player, but we can work around it
-		# The state machine accesses player.player_model, so we need to ensure compatibility
-		# TODO: Refactor state machines to accept Actor or CharacterBody3D + model reference
-		if actor is Player:
-			legs_machine.player = actor as Player
-		else:
-			# For enemies, we need to handle this differently
-			# Option 1: Create a compatibility wrapper (future)
-			# Option 2: Refactor state machines to use Actor + model reference
-			# For now, set player_aim to null (enemies don't need PlayerAim)
-			legs_machine.player_aim = null
-			# Cast actor to Player type for compatibility (will need refactoring later)
-			# This is a temporary workaround - state machines need to be refactored
-			legs_machine.player = actor  # This will cause type mismatch, but should work at runtime
+		legs_machine.actor = actor
 		legs_machine.forward_export_fields()
 
 	if torso_machine:
-		torso_machine.player = actor  # TorsoMachine accepts CharacterBody3D
-		# TorsoMachine expects PlayerResources, but ActorResources is the base class
-		# This works at runtime (PlayerResources extends ActorResources)
-		# TODO: Refactor TorsoMachine to accept ActorResources base type
-		torso_machine.resources = resources  # Type mismatch warning expected, but works at runtime
+		torso_machine.actor = actor
+		torso_machine.resources = resources
 		torso_machine.accept_behaviours()
 
 	current_behaviour = torso_machine.default_behaviour
 	torso_machine.current_behaviour = current_behaviour
-	current_behaviour._on_enter_behaviour(InputPackage.new())
+	current_behaviour._on_enter_behaviour(AIInputPackage.new())
 
 	if legs_anim_settings:
 		legs_anim_settings.play("simple")
 	if legs_machine and legs_machine.current_behaviour:
-		legs_machine.current_behaviour.on_enter_behaviour(InputPackage.new())
+		legs_machine.current_behaviour.on_enter_behaviour(AIInputPackage.new())
 	
 	# Initialize ActionResolver with actor and model references
 	if action_resolver:
@@ -84,7 +65,7 @@ func _ready() -> void:
 		action_resolver.set_model(self)
 
 
-func update(input: InputPackage, delta: float) -> void:
+func update(input: AIInputPackage, delta: float) -> void:
 	# Ensure resources are initialized exactly once (safe, no repeated from_dict)
 	_init_resources()
 

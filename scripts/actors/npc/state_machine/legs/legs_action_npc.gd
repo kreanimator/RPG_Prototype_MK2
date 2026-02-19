@@ -1,0 +1,76 @@
+extends Node
+class_name LegsActionNPC
+
+var actor : Actor
+var skeleton : Skeleton3D
+var combat : HumanoidCombat
+var legs : LegsMachineNPC
+var legs_anim_settings : AnimationPlayer
+var torso_anim_settings : AnimationPlayer
+
+@export var action_name : String
+@export var anim_settings : String = "simple"
+@export var legs_animator : SkeletonModifier3D
+@export var motion_type : LegsMachineNPC.MotionType
+
+var enter_action_time : float
+
+var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
+
+func _update(input : AIInputPackage, delta : float):
+	update(input, delta)
+	legs.last_y_speed = actor.velocity.y
+
+func update(_input : AIInputPackage, _delta : float):
+	pass
+
+func seek_land(delta : float):
+	if not actor.is_on_floor():
+		actor.velocity.y = legs.last_y_speed - gravity * delta
+
+# heirs use different animation modifiers, so we need per child definitions
+func setup_animator(_previous_action : LegsActionNPC, _input : AIInputPackage):
+	pass
+
+
+func _on_enter_action(input : AIInputPackage):
+	mark_enter_action()
+	on_enter_action(input)
+
+
+func on_enter_action(_input : AIInputPackage):
+	pass
+
+
+func on_exit_action():
+	pass
+
+
+func animation_ended() -> bool:
+	return false
+
+#region Time Measurements
+func mark_enter_action():
+	enter_action_time = Time.get_unix_time_from_system()
+
+func get_progress() -> float:
+	var now = Time.get_unix_time_from_system()
+	return now - enter_action_time
+
+func acts_longer_than(time : float) -> bool:
+	return get_progress() >= time
+
+func acts_less_than(time : float) -> bool:
+	return get_progress() < time
+
+func acts_between(start : float, finish : float) -> bool:
+	var progress = get_progress()
+	return progress >= start and progress <= finish
+#endregion
+
+func _is_out_of_ap() -> bool:
+	# Access resources through actor's humanoid_model
+	if actor is Actor and actor.humanoid_model:
+		return actor.humanoid_model.resources.is_out_of_ap()
+	return false
+

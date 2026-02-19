@@ -131,9 +131,13 @@ static func _get_actor_resources(actor: Actor) -> ActorResources:
 		var player := actor as Player
 		return player.player_model.resources
 	else:
-		return actor.get_node("Resources") as ActorResources
+		# For NPCs/enemies, resources are under the model (e.g., DustWalkerModel/Resources)
+		# Check if actor has humanoid_model property
+		if actor.humanoid_model != null:
+			return actor.humanoid_model.resources
+		# Fallback: try direct Resources node (for older setup or different actor types)
+		return actor.get_node_or_null("Resources") as ActorResources
 
 ## Public accessor for getting actor resources (for use in other scripts)
 static func get_actor_resources(actor: Actor) -> ActorResources:
 	return _get_actor_resources(actor)
-

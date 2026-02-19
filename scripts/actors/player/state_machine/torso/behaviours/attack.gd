@@ -86,21 +86,21 @@ func choose_action(input : InputPackage):
 func get_action_cost() -> int:
 	# Get action cost based on equipped weapon
 	var weapon = player.player_model.active_weapon
-	
+	var stats
 	if weapon is RangedWeapon:
 		var ranged_weapon = weapon as RangedWeapon
 		# For turn-based: single shot costs less than burst
 		if ranged_weapon.fire_mode == RangedWeapon.FireMode.BURST:
 			# Burst costs more AP (e.g., 2x single shot cost)
-			var stats := player.player_model.stats_manager as StatsManager
+			stats = player.player_model.stats_manager as StatsManager
 			return stats.get_unarmed_action_cost() * 2
 		else:
 			# Single shot costs same as unarmed
-			var stats := player.player_model.stats_manager as StatsManager
+			stats = player.player_model.stats_manager as StatsManager
 			return stats.get_unarmed_action_cost()
 	
 	# Unarmed or melee weapon
-	var stats := player.player_model.stats_manager as StatsManager
+	stats = player.player_model.stats_manager as StatsManager
 	return stats.get_unarmed_action_cost()
 
 

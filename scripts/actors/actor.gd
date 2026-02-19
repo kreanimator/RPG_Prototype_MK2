@@ -20,9 +20,14 @@ enum ActorMoveMode {
 @onready var faction_component: FactionComponent = get_node_or_null("FactionComponent")
 
 var current_interactable: Interactable = null
+var humanoid_model: HumanoidModel = null  # Reference to HumanoidModel for non-player actors
 
 func _ready() -> void:
 	add_to_group("actors")
+
+func set_humanoid_model(model: HumanoidModel) -> void:
+	"""Set the humanoid model reference (for non-player actors)"""
+	humanoid_model = model
 
 func set_target_position(pos: Vector3) -> void:
 	if nav_agent == null:

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dgy0co378g748"]
 
 [ext_resource type="Script" uid="uid://b2g2v2ya1srtn" path="res://scripts/actors/enemies/dust_walker.gd" id="1_q8aky"]
-[ext_resource type="Script" uid="uid://cpk2dipypjlet" path="res://scripts/actors/enemies/humanoid_model.gd" id="1_xdkhf"]
+[ext_resource type="PackedScene" uid="uid://5lcm6th45kk8" path="res://scenes/enemies/DustWalker/dust_walker_model.tscn" id="2_4mjbg"]
 [ext_resource type="PackedScene" uid="uid://dtuiyp383fp3c" path="res://scenes/enemies/DustWalker/dust_walker_visuals.tscn" id="3_4mjbg"]
 [ext_resource type="PackedScene" uid="uid://bukpe1wm5nsne" path="res://scenes/faction_component.tscn" id="4_4mjbg"]
 
@@ -14,8 +14,7 @@ collision_layer = 2
 collision_mask = 15
 script = ExtResource("1_q8aky")
 
-[node name="DustWalkerModel" type="Node3D" parent="." unique_id=24536248]
-script = ExtResource("1_xdkhf")
+[node name="DustWalkerModel" parent="." unique_id=93527990 instance=ExtResource("2_4mjbg")]
 
 [node name="DustWalkerVisuals" parent="." unique_id=1197851013 instance=ExtResource("3_4mjbg")]
 
@@ -28,7 +27,6 @@ debug_color = Color(0.7754044, 3.3643395e-05, 0.36344633, 0.41960785)
 path_desired_distance = 0.75
 target_desired_distance = 0.75
 avoidance_enabled = true
-radius = 1.0
 avoidance_layers = 15
 avoidance_mask = 15
 debug_enabled = true

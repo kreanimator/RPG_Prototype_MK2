@@ -182,18 +182,26 @@ func _stop_player_navigation() -> void:
 # Combat / HP
 # -------------------------
 
-func can_be_paid_behaviour(behaviour: TorsoBehaviour) -> bool:
+func can_be_paid_behaviour(behaviour: Node) -> bool:
+	"""Override parent to add player-specific logic (weapon checks, investigation mode, etc.)"""
 	if GameManager.game_state == GameManager.GameState.INVESTIGATION:
 		return true
 
+	# Cast to TorsoBehaviour for player-specific checks
+	if not behaviour is TorsoBehaviour:
+		# Fallback to parent implementation for non-TorsoBehaviour nodes
+		return super.can_be_paid_behaviour(behaviour)
+	
+	var torso_behaviour := behaviour as TorsoBehaviour
+	
 	var has_weapon := equipment_manager != null \
 		and equipment_manager.current_weapon != null \
 		and is_instance_valid(equipment_manager.current_weapon)
 
-	if behaviour.behaviour_name == "attack" and not has_weapon:
+	if torso_behaviour.behaviour_name == "attack" and not has_weapon:
 		return can_afford_action(stats_manager.get_unarmed_action_cost())
 
-	return can_afford_action(behaviour.ap_cost)
+	return can_afford_action(torso_behaviour.ap_cost)
 
 
 func take_damage(amount: float) -> void:

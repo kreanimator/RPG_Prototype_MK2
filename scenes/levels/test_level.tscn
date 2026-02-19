@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://cpayioc2prtug" path="res://scenes/dummy_interactable.tscn" id="6_6xh4u"]
 [ext_resource type="Script" uid="uid://1bnpi0rs50co" path="res://scripts/dummy_interactable.gd" id="7_7x1jh"]
 [ext_resource type="PackedScene" uid="uid://bksrxhfdvt02a" path="res://scenes/dummy_enemy.tscn" id="7_hfwtw"]
+[ext_resource type="PackedScene" uid="uid://dgy0co378g748" path="res://scenes/enemies/dust_walker.tscn" id="8_2mu0v"]
 [ext_resource type="PackedScene" uid="uid://cq1gygqlwqh4w" path="res://scenes/interactable.tscn" id="8_hfwtw"]
 [ext_resource type="Script" uid="uid://c7owhibtq16h4" path="res://scripts/dependant_dummy.gd" id="9_hfwtw"]
 [ext_resource type="Script" uid="uid://dad3cvrx4oma5" path="res://scripts/dependant_dummy2.gd" id="10_2mu0v"]
@@ -265,51 +266,58 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.62970734, -0.007890224, 0)
 use_collision = true
 size = Vector3(3, 0.5, 4)
 
-[node name="DummyEnemy" parent="." unique_id=1554000348 instance=ExtResource("7_hfwtw")]
+[node name="Actors" type="Node" parent="." unique_id=1924778211]
+
+[node name="DummyEnemy" parent="Actors" unique_id=1554000348 instance=ExtResource("7_hfwtw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.414871, 3.1299257, 14.145405)
 
-[node name="DummyInteractable" parent="." unique_id=2142339155 instance=ExtResource("6_6xh4u")]
+[node name="DustWalker" parent="Actors" unique_id=1171000512 instance=ExtResource("8_2mu0v")]
+transform = Transform3D(0.48578632, 0, -0.8740776, 0, 1, 0, 0.8740776, 0, 0.48578632, -15.610354, 0, 13.929278)
+
+[node name="Interactables" type="Node" parent="." unique_id=786977157]
+
+[node name="DummyInteractable" parent="Interactables" unique_id=2142339155 instance=ExtResource("6_6xh4u")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12782955, 0.3999981, 11.451701)
 collision_layer = 8
 collision_mask = 7
 action = "pick_up"
 
-[node name="DummyButton" type="Node3D" parent="." unique_id=2124759083 node_paths=PackedStringArray("dependant")]
+[node name="DummyButton" type="Node3D" parent="Interactables" unique_id=2124759083 node_paths=PackedStringArray("dependant")]
 transform = Transform3D(1, 0, 0, 0, 0.99977297, 0.021308858, 0, -0.021308858, 0.99977297, 5.2894545, 1.0269055, 0)
 script = ExtResource("7_7x1jh")
 destroy_on_interact = false
 action = "interact"
 dependant = NodePath("../Dependant")
 
-[node name="Interactable" parent="DummyButton" unique_id=1752676774 instance=ExtResource("8_hfwtw")]
+[node name="Interactable" parent="Interactables/DummyButton" unique_id=1752676774 instance=ExtResource("8_hfwtw")]
 interaction_zone_size = 1.5
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="DummyButton" unique_id=939376212]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Interactables/DummyButton" unique_id=939376212]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2509961, 0.53422666, 0.011386346)
 mesh = SubResource("BoxMesh_2mu0v")
 
-[node name="Dependant" type="Node3D" parent="." unique_id=1578050425]
+[node name="Dependant" type="Node3D" parent="Interactables" unique_id=1578050425]
 script = ExtResource("9_hfwtw")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Dependant" unique_id=1594215806]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Interactables/Dependant" unique_id=1594215806]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.3642235, 2.0029826, -5.3000784)
 mesh = SubResource("BoxMesh_jmx14")
 
-[node name="DummyButton2" type="Node3D" parent="." unique_id=1449623506 node_paths=PackedStringArray("dependant")]
+[node name="DummyButton2" type="Node3D" parent="Interactables" unique_id=1449623506 node_paths=PackedStringArray("dependant")]
 transform = Transform3D(1, 0, 0, 0, 0.99977297, 0.021308858, 0, -0.021308858, 0.99977297, 12.291858, 1.0269055, -21.399946)
 script = ExtResource("7_7x1jh")
 destroy_on_interact = false
 action = "interact"
-dependant = NodePath("../NavigationRegion3D/Dependant2")
+dependant = NodePath("../../NavigationRegion3D/Dependant2")
 
-[node name="Interactable" parent="DummyButton2" unique_id=602460127 instance=ExtResource("8_hfwtw")]
+[node name="Interactable" parent="Interactables/DummyButton2" unique_id=602460127 instance=ExtResource("8_hfwtw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3685894, 0.41678977, 0.008882523)
 interaction_zone_size = 1.5
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="DummyButton2" unique_id=1778383290]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Interactables/DummyButton2" unique_id=1778383290]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.37372494, 0.4649124, 0.009908676)
 mesh = SubResource("BoxMesh_2mu0v")
 
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="DummyButton2" unique_id=1220538272]
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Interactables/DummyButton2" unique_id=1220538272]
 transform = Transform3D(1, 0, 0, 0, 0.99977297, -0.021308858, 0, 0.021308858, 0.99977297, -0.13859558, -0.25209045, 0.0036716461)
 mesh = SubResource("BoxMesh_eaa0b")

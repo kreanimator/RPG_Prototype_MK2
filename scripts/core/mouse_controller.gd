@@ -184,7 +184,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _get_current_attack_range() -> float:
 	# TODO: later return equipped weapon range if exists
-	return 1.6
+	return 1.0
 
 func _get_snapped_navmesh_position(pos: Vector3) -> Vector3:
 	# Snap position to the closest point on the navigation mesh

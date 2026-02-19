@@ -1,14 +1,19 @@
 extends Node
 class_name HumanoidCombat
 
-@onready var model = $".." as PlayerModel
+# Model can be either PlayerModel or HumanoidModel
+var model: Node  # PlayerModel or HumanoidModel
 
 # TODO on call nodes/resources talk
-@export var resources : PlayerResources
+@export var resources : ActorResources
 
 @onready var weapon_socket_b : Node3D = $"../Back/WeaponSocketB"
 @onready var weapon_socket_ra : Node3D = $"../RightWrist/WeaponSocketRA"
 var active_weapon: Weapon
+
+func _ready() -> void:
+	# Auto-detect model from parent (works for both PlayerModel and HumanoidModel)
+	model = get_parent()
 static var melee_attacks : Dictionary = {
 	"light_attack_pressed" : "slash_1",
 }
@@ -18,11 +23,11 @@ static var melee_attacks : Dictionary = {
 #}
 
 var weapon_holstered : bool = false
-var aim_mode_on : bool = false
-var is_precise_aim : bool = false
+
 
 	
-func contextualize(new_input : InputPackage) -> InputPackage:
+func contextualize(new_input) -> InputPackage:
+	# Accept both InputPackage and AIInputPackage (AIInputPackage extends InputPackage)
 	translate_inputs(new_input)
 	
 	# TODO wrap function maybe
@@ -31,50 +36,29 @@ func contextualize(new_input : InputPackage) -> InputPackage:
 			new_input.behaviour_names.append("take_weapons")
 		else:
 			new_input.behaviour_names.append("hide_weapons")
-	active_weapon = model.active_weapon if is_instance_valid(model.active_weapon) else null
 	
-	# Reset aim mode if weapon is invalid or not a ranged weapon
-	if aim_mode_on and (active_weapon == null or not (active_weapon is RangedWeapon)):
-		aim_mode_on = false
-		is_precise_aim = false
-		# Sync with player aim system
-		if model.player_aim:
-			model.player_aim.is_precise_aim = false
+	# Safely access active_weapon from model (works for both PlayerModel and HumanoidModel)
+	if model != null:
+		# Use get() which returns null if property doesn't exist
+		var weapon = model.get("active_weapon")
+		active_weapon = weapon if is_instance_valid(weapon) else null
+	else:
+		active_weapon = null
 	
-	if new_input.actions.has("toggle_aim_mode") and active_weapon != null and active_weapon is RangedWeapon:
-		if not aim_mode_on:
-			# Entering aim mode - turn off aim line and reset precise aim
-			aim_mode_on = true
-			is_precise_aim = false
-			# Sync with player aim system
-			if model.player_aim:
-				model.player_aim.is_precise_aim = false
-		else:
-			# Already aiming, toggle again - exit aim mode
-			aim_mode_on = false
-			is_precise_aim = false
-			# Sync with player aim system
-			if model.player_aim:
-				model.player_aim.is_precise_aim = false
-		
-	
-	# Handle precise aim toggle separately (only when already aiming)
-	if new_input.aim_actions.has("toggle_precise_aim_mode") and aim_mode_on and active_weapon != null and active_weapon is RangedWeapon:
-		is_precise_aim = !is_precise_aim
-		# Sync with player aim system
-		if model.player_aim:
-			model.player_aim.is_precise_aim = is_precise_aim
-	
-	if aim_mode_on:
-		new_input.behaviour_names.append("aim")
 	
 	return new_input
 
 
 func translate_inputs(input : InputPackage):
 	if not input.combat_actions.is_empty():
-		active_weapon = model.active_weapon if is_instance_valid(model.active_weapon) else null
-		if not aim_mode_on and active_weapon != null and not (active_weapon is RangedWeapon):
+		# Safely access active_weapon from model (works for both PlayerModel and HumanoidModel)
+		if model != null:
+			# Use get() which returns null if property doesn't exist
+			var weapon = model.get("active_weapon")
+			active_weapon = weapon if is_instance_valid(weapon) else null
+		else:
+			active_weapon = null
+		if not (active_weapon is RangedWeapon):
 			for action in input.combat_actions:
 				# Only process actions that exist in melee_attacks dictionary
 				# light_attack_held is only for ranged weapons, skip it for melee
