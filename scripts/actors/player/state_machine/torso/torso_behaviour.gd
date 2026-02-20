@@ -14,7 +14,8 @@ class_name TorsoBehaviour
 		"crouch" : "crouch",
 		"crouch_idle": "crouch_idle",
 		"interact": "interact",
-		"attack": "attack"
+		"attack": "attack",
+		"knockback": "knockback"
 	}
 @export var interrupted_by_fall : bool = true
 @export var maps_with_stance : bool = false
